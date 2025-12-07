@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+/* --- MENU / CABEÇALHO --- */
+.topo {
+    text-align: center;
+    padding: 20px;
+    background: #0b0d11;
+    border-bottom: 2px solid #32dbad;
+}
+
+.logo {
+    width: 180px;
+    margin-bottom: 10px;
+}
+
+nav a {
+    margin: 0 12px;
+    text-decoration: none;
+    color: #32dbad;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #00ffa8;
+}
+
+/* --- ÁREA DE DESTAQUE --- */
+.destaque {
+    text-align: center;
+    padding: 50px 10px;
+    background: linear-gradient(45deg, #001f1a, #000000);
+    border-bottom: 2px solid #32dbad;
+}
+
+.destaque h1 {
+    color: #32dbad;
+    font-size: 42px;
+    text-shadow: 0px 0px 10px #32dbad;
+}
+
+/* --- CARDS DE CATEGORIAS --- */
+.categorias {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    padding: 40px 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: #0f1418;
+    padding: 25px;
+    border-radius: 8px;
+    width: 240px;
+    text-align: center;
+    border: 2px solid #32dbad;
+    box-shadow: 0px 0px 10px #00ffa8;
+}
+
+.card h3 {
+    color: #32dbad;
+}
+
+.botao {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 18px;
+    background: #32dbad;
+    color: #000000;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.botao:hover {
+    background: #00ffa8;
+}
+
+/* --- RODAPÉ --- */
+footer {
+    text-align: center;
+    padding: 18px;
+    background-color: #0b0d11;
+    border-top: 2px solid #32dbad;
+    margin-top: 40px;
+}
