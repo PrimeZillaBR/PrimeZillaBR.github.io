@@ -1,1 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin - PrimeZilla</title>
+<style>
+:root{--bg:#040506;--card:#0d1320;--accent:#00bfff;--text:#e6f7ff;--muted:#8899aa}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#071021);color:var(--text)}
+.wrap{max-width:980px;margin:30px auto;padding:18px}
+.card{background:linear-gradient(180deg,var(--card),#071127);border-radius:12px;padding:18px;border:1px solid rgba(0,191,255,0.06)}
+h1{color:var(--accent)}
+label{display:block;margin:8px 0;color:var(--muted)}
+input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071125;color:var(--text)}
+button{background:linear-gradient(90deg,var(--accent),#00f0ff);border:none;padding:10px;border-radius:8px;color:#001826;font-weight:800;cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+.hidden{display:none}
+.product{border:1px dashed rgba(255,255,255,0.03);padding:10px;border-radius:8px;margin-bottom:10px}
+.small{font-size:13px;color:var(--muted)}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.logout{background:#111;border-radius:8px;padding:8px 12px;border:1px solid rgba(255,255,255,0.03);color:var(--muted);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="loginCard">
+    <h1>Painel Administrador — PrimeZilla</h1>
+    <p class="small">Entre com suas credenciais para acessar o painel de edição.</p>
+    <label>Usuário</label><input type="text" id="userInput" placeholder="Usuário">
+    <label>Senha</label><input type="password" id="passInput" placeholder="Senha">
+    <div style="margin-top:12px"><button id="loginBtn">Entrar</button> <button id="cancelBtn" class="btn-ghost">Voltar</button></div>
+    <p class="small" style="margin-top:10px">Usuário exemplo: <strong>primezilla2025</strong> • Senha: <strong>primezilla1234...</strong></p>
+  </div>
+
+  <div id="adminArea" class="card hidden">
+    <div class="topbar">
+      <div>
+        <h1 style="margin:0">Editor de Produtos</h1>
+        <p class="small">Edite valores/promos e sabores. As alterações são salvas no localStorage do navegador.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="addProductBtn" class="btn-ghost">Adicionar produto</button>
+        <button id="logoutBtn" class="logout">Logout</button>
+      </div>
+    </div>
+
+    <div id="produtosList"></div>
+
+    <div style="margin-top:12px">
+      <button id="exportBtn">Exportar dados (JSON)</button> <button id="importBtn" class="btn-ghost">Importar JSON</button>
+      <input id="fileInput" type="file" accept="application/json" class="hidden">
+    </div>
+  </div>
+</div>
+
+<script>
+const CORRECT_USER='primezilla2025';
+const CORRECT_PASS='primezilla1234...';
+const STORAGE_KEY='primezilla_produtos';
+
+function isAuthed(){ return sessionStorage.getItem('primezilla_authed')==='1' }
+function setAuthed(){ sessionStorage.setItem('primezilla_authed','1') }
+function clearAuth(){ sessionStorage.removeItem('primezilla_authed') }
+
+const loginCard=document.getElementById('loginCard');
+const adminArea=document.getElementById('adminArea');
+
+if(isAuthed()) showAdmin();
+
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+  const u=document.getElementById('userInput').value.trim();
+  const p=document.getElementById('passInput').value;
+  if(u===CORRECT_USER && p===CORRECT_PASS){ setAuthed(); showAdmin(); } else { alert('Usuário ou senha incorretos'); }
+});
+document.getElementById('cancelBtn').addEventListener('click', ()=> location.href='index.html');
+document.getElementById('logoutBtn').addEventListener('click', ()=>{ clearAuth(); location.reload(); });
+
+function carregarProdutos(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw) return [
+    {categoria:'pods',nome:'LifePod 8K',valorOriginal:'',valorPromo:'',sabores:[]},
+    {categoria:'pods',nome:'LifePod 10K',valorOriginal:'130.00',valorPromo:'',sabores:['Peach Mango','Strawberry Watermelon','Love 66','Menthol','Polar Ice','Grape Honeydew','Watermelon Ice','Passion Mango','Clear','Blackberry Ice','Mint Waterberry','Blueberry Mint']},
+    {categoria:'pods',nome:'LifePod 150K',valorOriginal:'',valorPromo:'',sabores:[]},
+    {categoria:'pods',nome:'Ignite 8K',valorOriginal:'',valorPromo:'',sabores:[]},
+    {categoria:'pods',nome:'Ignite 10K',valorOriginal:'',valorPromo:'',sabores:[]},
+    {categoria:'pods',nome:'Ignite 150K',valorOriginal:'',valorPromo:'',sabores:[]}
+  ];
+  try{ return JSON.parse(raw); }catch(e){ return []; }
+}
+function salvar(produtos){ localStorage.setItem(STORAGE_KEY,JSON.stringify(produtos)); window.dispatchEvent(new StorageEvent('storage',{key:STORAGE_KEY})); }
+
+function showAdmin(){ loginCard.classList.add('hidden'); adminArea.classList.remove('hidden'); renderProdutos(); }
+
+function renderProdutos(){
+  const produtos=carregarProdutos();
+  const lista=document.getElementById('produtosList');
+  lista.innerHTML='';
+  produtos.forEach((p,idx)=>{
+    const el=document.createElement('div'); el.className='product';
+    el.innerHTML = `<strong>${p.nome}</strong>
+      <div style="margin-top:8px">
+        <label>Categoria</label><input id="cat_${idx}" value="${p.categoria||''}">
+        <label>Valor Original</label><input id="orig_${idx}" value="${p.valorOriginal||''}">
+        <label>Valor Promo</label><input id="promo_${idx}" value="${p.valorPromo||''}">
+      </div>
+      <div style="margin-top:8px">
+        <label>Sabores</label>
+        <ul id="listaSab_${idx}">${(p.sabores||[]).map((s,si)=>`<li>${s} <button data-idx="${idx}" data-si="${si}" class="rm-sabor">Remover</button></li>`).join('')}</ul>
+        <input id="novoSab_${idx}" placeholder="Novo sabor"><button data-idx="${idx}" class="add-sabor btn-ghost">Adicionar</button>
+      </div>
+      <div style="margin-top:8px"><button data-idx="${idx}" class="save-prod">Salvar</button> <button data-idx="${idx}" class="del-prod btn-ghost">Excluir</button></div>`;
+    lista.appendChild(el);
+  });
+
+  document.querySelectorAll('.save-prod').forEach(btn=>btn.addEventListener('click',(e)=>{
+    const i=+e.currentTarget.getAttribute('data-idx');
+    const prods=carregarProdutos();
+    prods[i].categoria=document.getElementById('cat_'+i).value.trim();
+    prods[i].valorOriginal=document.getElementById('orig_'+i).value.trim();
+    prods[i].valorPromo=document.getElementById('promo_'+i).value.trim();
+    salvar(prods); renderProdutos();
+  }));
+
+  document.querySelectorAll('.del-prod').forEach(btn=>btn.addEventListener('click',(e)=>{
+    if(!confirm('Excluir este produto?')) return;
+    const i=+e.currentTarget.getAttribute('data-idx');
+    const prods=carregarProdutos(); prods.splice(i,1); salvar(prods); renderProdutos();
+  }));
+
+  document.querySelectorAll('.add-sabor').forEach(btn=>btn.addEventListener('click',(e)=>{
+    const i=+e.currentTarget.getAttribute('data-idx');
+    const v=document.getElementById('novoSab_'+i).value.trim(); if(!v) return alert('Digite um sabor');
+    const prods=carregarProdutos(); prods[i].sabores=prods[i].sabores||[]; prods[i].sabores.push(v); document.getElementById('novoSab_'+i).value=''; salvar(prods); renderProdutos();
+  }));
+
+  document.querySelectorAll('.rm-sabor').forEach(btn=>btn.addEventListener('click',(e)=>{
+    const i=+e.currentTarget.getAttribute('data-idx'); const si=+e.currentTarget.getAttribute('data-si');
+    const prods=carregarProdutos(); prods[i].sabores.splice(si,1); salvar(prods); renderProdutos();
+  }));
+}
+
+document.getElementById('addProductBtn').addEventListener('click', ()=>{
+  const nome=prompt('Nome do novo produto:'); if(!nome) return;
+  const prods=carregarProdutos(); prods.push({categoria:'outros',nome:nome.trim(),valorOriginal:'',valorPromo:'',sabores:[]}); salvar(prods); renderProdutos();
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const data=localStorage.getItem(STORAGE_KEY)||'[]';
+  const blob=new Blob([data],{type:'application/json'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='primezilla_produtos.json'; a.click(); URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',(e)=>{
+  const f=e.target.files[0]; if(!f) return; const reader=new FileReader(); reader.onload=(ev)=>{ try{ const parsed=JSON.parse(ev.target.result); if(Array.isArray(parsed)){ localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed)); alert('Importado com sucesso'); renderProdutos(); } else alert('Arquivo inválido'); }catch(err){ alert('Erro ao ler o arquivo'); } }; reader.readAsText(f);
+});
+
+window.addEventListener('storage',(e)=>{ if(e.key===STORAGE_KEY) renderProdutos(); });
+</script>
+</body>
+</html>
 
