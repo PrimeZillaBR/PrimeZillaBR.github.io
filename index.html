@@ -5,91 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>PrimeZilla — Loja</title>
 <link rel="stylesheet" href="style.css">
-<!-- Firebase SDKs -->
-<script type="module">
-  // WARNING: insira seu firebaseConfig abaixo (eu explico onde obter)
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getFirestore, collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-  // --- substitua com seu config do Firebase ---
-  const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_AUTH_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
-    storageBucket: "SEU_STORAGE_BUCKET",
-    messagingSenderId: "SEU_SENDER_ID",
-    appId: "SEU_APP_ID"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // após DOM carregar
-  document.addEventListener('DOMContentLoaded', ()=> {
-    const container = document.getElementById('productsGrid');
-    // consulta: só produtos ativos, ordena por createdAt
-    const q = query(collection(db,'products'), orderBy('createdAt','desc'));
-    onSnapshot(q, snapshot => {
-      container.innerHTML = '';
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        if(!p.active) return;
-        const priceText = p.price ? `R$ ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-        const img = p.imageUrl || 'placeholder.png';
-        // criar card
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <img src="${img}" alt="${escapeHtml(p.name)}">
-          <h3>${escapeHtml(p.name)}</h3>
-          <p class="price">${priceText}</p>
-          <div class="actions">
-            <select class="qty">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-            </select>
-            <select class="variant">${(p.options||[]).map(o=>`<option value="${encodeURIComponent(o)}">${escapeHtml(o)}</option>`).join('')}</select>
-            <select class="payment">
-              <option value="PIX">PIX</option>
-              <option value="Dinheiro">Dinheiro</option>
-              <option value="Cartão">Cartão</option>
-            </select>
-            <button class="whatsappBtn">Fazer pedido</button>
-          </div>
-        `;
-        // evento do botão
-        card.querySelector('.whatsappBtn').addEventListener('click', ()=>{
-          const qtd = card.querySelector('.qty').value;
-          const variant = decodeURIComponent(card.querySelector('.variant').value || '-');
-          const payment = card.querySelector('.payment').value;
-          // mensagem conforme regra: se type == "pod" use "Cor/Sabor", senão "Cor/Sabor" assumimos cor
-          const variantLabel = (p.type === 'pod') ? 'Cor/Sabor' : 'Cor/Sabor';
-          const valorText = p.price ? `R$ ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-          const text = encodeURIComponent(
-            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${payment}`
-          );
-          const phone = '5567992018672'; // seu número sem + , sem espaços
-          const url = `https://wa.me/${phone}?text=${text}`;
-          window.open(url,'_blank');
-        });
-
-        container.appendChild(card);
-      });
-    });
-  });
-
-  // escape simples
-  function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-</script>
 </head>
 <body>
 <header class="topo">
   <img src="logo.png" class="logo" alt="PrimeZilla">
-  <nav><a href="index.html">Início</a><a href="produtos.html">Produtos</a><a href="contato.html">Contato</a></nav>
+  <nav>
+    <a href="index.html">Início</a>
+    <a href="produtos.html">Produtos</a>
+    <a href="admin.html">Admin</a>
+    <a href="contato.html">Contato</a>
+  </nav>
 </header>
 
 <main>
   <section class="hero">
     <h1>PrimeZilla</h1>
-    <p>Produtos selecionados. Frete grátis para Jardim & Guia Lopes.</p>
+    <p>Produtos selecionados — clique e compre pelo WhatsApp</p>
   </section>
 
   <section class="catalog">
@@ -99,18 +30,52 @@
 
 <footer>© 2025 PrimeZilla</footer>
 
-<style>
-/* CSS compacto: estilize depois para combinar com referência */
-body{font-family:Inter,Arial;margin:0;background:#fff;color:#111}
-.topo{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #eee}
-.logo{height:56px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:20px}
-.card{background:#fff;border:1px solid #f1f5f9;padding:12px;border-radius:10px;text-align:center;box-shadow:0 6px 20px rgba(10,132,255,0.03)}
-.card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
-.price{font-weight:700;color:#0A84FF}
-.actions{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.actions select{padding:8px;border-radius:6px;border:1px solid #e6eefb}
-.actions button{background:#0A84FF;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer}
-</style>
+<script>
+// Lê produtos.json e monta a grade
+async function loadProducts() {
+  try {
+    const res = await fetch('/produtos.json', {cache: "no-store"});
+    const products = await res.json();
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = '';
+    products.filter(p=>p.active).forEach(p=>{
+      const imgSrc = (p.image && p.image.startsWith('data:')) ? p.image : (p.image || 'placeholder.png');
+      const priceText = p.price ? `${p.currency} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${imgSrc}" alt="${escapeHtml(p.name)}">
+        <h3>${escapeHtml(p.name)}</h3>
+        <p class="price">${priceText}</p>
+        <div class="actions">
+          <label>Qtd <select class="sel-qty"><option>1</option><option>2</option><option>3</option></select></label>
+          ${(p.type==='pod')?`<label>Sabor <select class="sel-variant">${(p.options||[]).map(o=>`<option>${o}</option>`).join('')}</select></label>`:
+          `<label>Cor <select class="sel-variant">${(p.options&&p.options.length)?(p.options.map(o=>`<option>${o}</option>`).join('')):`<option>-</option>`}</select></label>`}
+          <label>Pagamento <select class="sel-pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select></label>
+        </div>
+        <a class="botao whatsappBtn" href="#">Fazer pedido</a>
+      `;
+      // evento do botao
+      card.querySelector('.whatsappBtn').addEventListener('click', ()=>{
+        const qty = card.querySelector('.sel-qty').value;
+        const variant = card.querySelector('.sel-variant').value || '-';
+        const pay = card.querySelector('.sel-pay').value;
+        const valorText = p.price ? `${p.currency} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+        const variantLabel = (p.type==='pod') ? 'Sabor' : 'Cor';
+        const text = encodeURIComponent(`Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qty}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`);
+        const phone = '5567992018672';
+        window.open(`https://wa.me/${phone}?text=${text}`,'_blank');
+      });
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    console.error(err);
+    document.getElementById('productsGrid').innerHTML = '<p>Erro ao carregar produtos.</p>';
+  }
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+loadProducts();
+</script>
+
 </body>
 </html>
