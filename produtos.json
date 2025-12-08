@@ -1,0 +1,46 @@
+[
+  {
+    "id": "prod-1",
+    "name": "Cabo 60W Turbo USB-C - 1m",
+    "price": 15.90,
+    "currency": "R$",
+    "category": "acessorios",
+    "type": "non-pod",
+    "options": [],
+    "image": "prod_1.png",
+    "active": true
+  },
+  {
+    "id": "prod-2",
+    "name": "Kit Carregador Mini Pro Max 20W",
+    "price": 51.90,
+    "currency": "R$",
+    "category": "acessorios",
+    "type": "non-pod",
+    "options": [],
+    "image": "prod_2.png",
+    "active": true
+  },
+  {
+    "id": "prod-3",
+    "name": "Cabo Lightning / USB-C 20W",
+    "price": 12.90,
+    "currency": "R$",
+    "category": "acessorios",
+    "type": "non-pod",
+    "options": [],
+    "image": "prod_3.png",
+    "active": true
+  },
+  {
+    "id": "prod-4",
+    "name": "Garrafa de Alumínio Anime 500ml",
+    "price": 31.90,
+    "currency": "R$",
+    "category": "outros",
+    "type": "non-pod",
+    "options": [],
+    "image": "prod_4.png",
+    "active": true
+  }
+]
