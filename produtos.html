@@ -1,69 +1,52 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Produtos — PrimeZilla</title>
-<link rel="stylesheet" href="style.css">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Produtos — PrimeZilla</title><link rel="stylesheet" href="style.css"></head>
 <body>
 <header class="topo">
   <img src="logo.png" class="logo" alt="PrimeZilla">
-  <nav>
-    <a href="index.html">Início</a>
-    <a href="produtos.html">Shopping</a>
-    <a href="fans.html">Clientes Fãs</a>
-    <a href="contato.html">Contato</a>
-  </nav>
+  <nav><a href="index.html">Início</a><a href="produtos.html">Produtos</a><a href="admin.html">Admin</a><a href="contato.html">Contato</a></nav>
 </header>
 
-<section style="padding:18px;max-width:1100px;margin:0 auto">
-  <h2 style="color:var(--primary)">Pods / Descartáveis</h2>
-  <div class="categorias" id="pods">
-    <!-- (Nenhum dos 4 é pod; mantemos espaço para futuros) -->
-    <p style="color:var(--muted)">Sem itens nesta categoria por enquanto.</p>
+<main style="max-width:1200px;margin:20px auto;padding:0 16px">
+  <h2>Categorias</h2>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px">
+    <button class="catBtn" data-cat="pods">Pods</button>
+    <button class="catBtn" data-cat="acessorios">Acessórios</button>
+    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
+    <button class="catBtn" data-cat="outros">Outros</button>
+    <button class="catBtn" data-cat="all">Todos</button>
   </div>
 
-  <h2 style="color:var(--primary);margin-top:18px" id="acessorios">Acessórios</h2>
-  <div class="categorias">
-    <!-- prod_1 / prod_2 / prod_3 -->
-    <div class="card">
-      <img src="prod_1.png" style="width:100%;height:140px;object-fit:cover;border-radius:6px">
-      <h3>Cabo 60W Turbo USB-C</h3>
-      <p>1 metro</p>
-      <p style="font-weight:700">R$ 15,90</p>
-      <a class="botao" href="https://wa.me/5567992018672?text=Ol%C3%A1!%20Tenho%20interesse%20no%20produto:%20Cabo%2060W%20Turbo%20USB-C%201m%0AQuantidade:%201%0ACor%2FSabor:%20-%0AValor:%20R$%2015,90%0AForma%20de%20Pagamento:%20PIX" target="_blank">Comprar via WhatsApp</a>
-    </div>
+  <div id="productsGrid" class="grid"></div>
+</main>
 
-    <div class="card">
-      <img src="prod_2.png" style="width:100%;height:140px;object-fit:cover;border-radius:6px">
-      <h3>Kit Carregador 20W + Cabo</h3>
-      <p>USB-C / Lightning</p>
-      <p style="font-weight:700">R$ 51,90</p>
-      <a class="botao" href="https://wa.me/5567992018672?text=Ol%C3%A1!%20Tenho%20interesse%20no%20produto:%20Kit%20Carregador%20Mini%20Pro%20Max%2020W%0AQuantidade:%201%0ACor%2FSabor:%20-%0AValor:%20R$%2051,90%0AForma%20de%20Pagamento:%20PIX" target="_blank">Comprar via WhatsApp</a>
-    </div>
-
-    <div class="card">
-      <img src="prod_3.png" style="width:100%;height:140px;object-fit:cover;border-radius:6px">
-      <h3>Cabo Lightning / USB-C 20W</h3>
-      <p>1 metro</p>
-      <p style="font-weight:700">R$ 12,90</p>
-      <a class="botao" href="https://wa.me/5567992018672?text=Ol%C3%A1!%20Tenho%20interesse%20no%20produto:%20Cabo%2020W%20Turbo%20Lightning%20%2F%20USB-C%0AQuantidade:%201%0ACor%2FSabor:%20-%0AValor:%20R$%2012,90%0AForma%20de%20Pagamento:%20PIX" target="_blank">Comprar via WhatsApp</a>
-    </div>
-  </div>
-
-  <h2 style="color:var(--primary);margin-top:18px" id="outros">Outros</h2>
-  <div class="categorias">
-    <div class="card">
-      <img src="prod_4.png" style="width:100%;height:140px;object-fit:cover;border-radius:6px">
-      <h3>Garrafa de Alumínio Anime 500ml</h3>
-      <p>Com chaveiro</p>
-      <p style="font-weight:700">R$ 31,90</p>
-      <a class="botao" href="https://wa.me/5567992018672?text=Ol%C3%A1!%20Tenho%20interesse%20no%20produto:%20Garrafa%20de%20Alum%C3%ADnio%20500ml%20Anime%0AQuantidade:%201%0ACor%2FSabor:%20-%0AValor:%20R$%2031,90%0AForma%20de%20Pagamento:%20PIX" target="_blank">Comprar via WhatsApp</a>
-    </div>
-  </div>
-</section>
-
-<footer style="padding:18px;text-align:center;color:var(--muted);">© 2025 PrimeZilla</footer>
+<script>
+async function loadProducts(filter='all'){
+  const res = await fetch('/produtos.json',{cache:'no-store'});
+  const products = await res.json();
+  const grid = document.getElementById('productsGrid');
+  grid.innerHTML='';
+  products.filter(p=>p.active && (filter==='all' || p.category===filter)).forEach(p=>{
+    const img = (p.image && p.image.startsWith('data:')) ? p.image : (p.image || 'placeholder.png');
+    const priceText = p.price ? `${p.currency} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+    const el = document.createElement('div'); el.className='card';
+    el.innerHTML = `
+      <img src="${img}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p class="price">${priceText}</p>
+      <a class="botao whatsappBtn" href="#">Fazer pedido</a>
+    `;
+    el.querySelector('.whatsappBtn').addEventListener('click', ()=>{
+      const variantLabel = (p.type==='pod')? 'Sabor':'Cor';
+      const variant = (p.options && p.options[0])? p.options[0] : '-';
+      const text = encodeURIComponent(`Olá! Tenho interesse no produto: ${p.name}\nQuantidade: 1\n${variantLabel}: ${variant}\nValor: ${priceText}\nForma de Pagamento: PIX`);
+      window.open(`https://wa.me/5567992018672?text=${text}`,'_blank');
+    });
+    grid.appendChild(el);
+  });
+}
+document.querySelectorAll('.catBtn').forEach(b=>b.addEventListener('click',()=>loadProducts(b.dataset.cat)));
+loadProducts();
+</script>
 </body>
 </html>
