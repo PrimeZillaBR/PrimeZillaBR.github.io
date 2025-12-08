@@ -1,210 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin - PrimeZilla</title>
-  <style>
-    :root{--bg:#040506;--card:#0d1320;--accent:#00bfff;--glow:#00f0ff;--text:#e6f7ff;--muted:#8899aa}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#071021);color:var(--text);-webkit-font-smoothing:antialiased}
-    .wrap{max-width:980px;margin:30px auto;padding:18px}
-    .card{background:linear-gradient(180deg,var(--card),#071127);border-radius:12px;padding:18px;border:1px solid rgba(0,191,255,0.06);box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-    h1{color:var(--accent);margin:0 0 12px}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
-    label{display:block;margin:8px 0;font-size:14px;color:var(--muted)}
-    input[type=text],input[type=password],textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071125;color:var(--text);outline:none}
-    button{background:linear-gradient(90deg,var(--accent),var(--glow));border:none;padding:10px 12px;border-radius:8px;color:#001826;font-weight:800;cursor:pointer}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-    .product{border:1px dashed rgba(255,255,255,0.03);padding:10px;border-radius:8px;margin-bottom:10px}
-    .small{font-size:13px;color:var(--muted)}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-    .logout{background:#111;border-radius:8px;padding:8px 12px;border:1px solid rgba(255,255,255,0.03);color:var(--muted);cursor:pointer}
-    .hidden{display:none}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}}
-  </style>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin - PrimeZilla</title>
+<link rel="stylesheet" href="style.css">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+  // --- coloque seu firebaseConfig aqui ---
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_AUTH_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE_BUCKET",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const loginForm = document.getElementById('loginForm');
+    const adminArea = document.getElementById('adminArea');
+    const status = document.getElementById('status');
+    const addForm = document.getElementById('addForm');
+
+    loginForm.addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      const email = loginForm.email.value;
+      const pass = loginForm.password.value;
+      try{
+        await signInWithEmailAndPassword(auth,email,pass);
+        loginForm.style.display='none';
+        adminArea.style.display='block';
+        status.textContent = 'Conectado';
+      }catch(err){ alert('Erro login: '+err.message); }
+    });
+
+    addForm.addEventListener('submit', async ev=>{
+      ev.preventDefault();
+      const name = addForm.name.value.trim();
+      const price = parseFloat(addForm.price.value) || 0;
+      const category = addForm.category.value;
+      const type = addForm.type.value; // 'pod' or 'non-pod'
+      const optionsRaw = addForm.options.value.trim(); // separado por vírgula
+      const options = optionsRaw ? optionsRaw.split(',').map(s=>s.trim()) : [];
+      const file = addForm.image.files[0];
+      if(!name){ return alert('Coloque nome'); }
+
+      // upload de imagem (se houver)
+      let imageUrl = '';
+      if(file){
+        const path = `products/${Date.now()}_${file.name}`;
+        const stRef = ref(storage,path);
+        await uploadBytes(stRef,file);
+        imageUrl = await getDownloadURL(stRef);
+      }
+      // criar doc
+      await addDoc(collection(db,'products'), {
+        name, price, category, type,
+        options,
+        imageUrl,
+        active: true,
+        createdAt: serverTimestamp()
+      });
+      alert('Produto criado');
+      addForm.reset();
+    });
+
+    // logout
+    document.getElementById('logout').addEventListener('click', ()=> signOut(auth).then(()=> location.reload()));
+
+    // TODO: listar produtos + editar/excluir (posso te entregar já se quiser)
+  });
+</script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card" id="loginCard">
-      <h1>Painel Administrador — PrimeZilla</h1>
-      <p class="small">Entre com suas credenciais para acessar o painel de edição. (Usuário e senha fornecidos pelo proprietário.)</p>
-      <div style="margin-top:14px">
-        <label>Usuário</label>
-        <input type="text" id="userInput" placeholder="Digite seu usuário">
-        <label>Senha</label>
-        <input type="password" id="passInput" placeholder="Digite sua senha">
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="loginBtn">Entrar</button>
-          <button id="cancelBtn" class="btn-ghost">Voltar</button>
-        </div>
-        <p class="small" style="margin-top:10px">Usuário example: <strong>primezilla2025</strong></p>
-      </div>
-    </div>
-
-    <div id="adminArea" class="card hidden">
-      <div class="topbar">
-        <div>
-          <h1 style="margin:0">Editor de Produtos</h1>
-          <p class="small">Edite valores/promos e sabores. As alterações são salvas no seu navegador (localStorage).</p>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="addProductBtn" class="btn-ghost">Adicionar produto</button>
-          <button id="logoutBtn" class="logout">Logout</button>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div>
-          <div id="produtosList"></div>
-        </div>
-        <div>
-          <div class="card" style="background:transparent;border:none;padding:0">
-            <h3 style="color:var(--accent);margin-top:0">Visualização / Dicas</h3>
-            <p class="small">Preencha <strong>Valor Original</strong> e opcionalmente <strong>Valor Promoção</strong>. Quando ambos existirem, a vitrine mostrará o preço original riscado e o preço promocional em destaque.</p>
-            <p class="small">Use o campo de sabores para adicionar quantos sabores quiser por produto. Você também pode remover sabores.</p>
-            <p class="small">Ao finalizar, abra a página inicial (index.html) para ver as mudanças refletidas. Se estiver em outro dispositivo, exporte os dados (opção abaixo).</p>
-            <div style="margin-top:12px">
-              <button id="exportBtn">Exportar dados (JSON)</button>
-              <button id="importBtn" class="btn-ghost">Importar JSON</button>
-            </div>
-            <input type="file" id="fileInput" accept="application/json" class="hidden">
-          </div>
-        </div>
-      </div>
-
-    </div>
+<div style="max-width:920px;margin:18px auto;padding:12px">
+  <h2>Admin - PrimeZilla</h2>
+  <div id="loginFormWrap">
+    <form id="loginForm">
+      <input name="email" placeholder="Email" required><br><br>
+      <input type="password" name="password" placeholder="Senha" required><br><br>
+      <button type="submit">Entrar</button>
+    </form>
   </div>
 
-  <script>
-    // credenciais (definidas conforme solicitado)
-    const CORRECT_USER = 'primezilla2025';
-    const CORRECT_PASS = 'primezilla1234...'; // três pontos ao final
-
-    // elementos
-    const loginCard = document.getElementById('loginCard');
-    const adminArea = document.getElementById('adminArea');
-    const loginBtn = document.getElementById('loginBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const addProductBtn = document.getElementById('addProductBtn');
-    const produtosList = document.getElementById('produtosList');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const fileInput = document.getElementById('fileInput');
-
-    // storage key
-    const STORAGE_KEY = 'primezilla_produtos';
-
-    // simples autenticação via sessionStorage
-    function isAuthed(){ return sessionStorage.getItem('primezilla_authed') === '1'; }
-    function setAuthed(){ sessionStorage.setItem('primezilla_authed','1'); }
-    function clearAuth(){ sessionStorage.removeItem('primezilla_authed'); }
-
-    // inicial
-    if(isAuthed()) showAdmin();
-
-    loginBtn.addEventListener('click', ()=>{
-      const u = document.getElementById('userInput').value.trim();
-      const p = document.getElementById('passInput').value;
-      if(u === CORRECT_USER && p === CORRECT_PASS){ setAuthed(); showAdmin(); } else { alert('Usuário ou senha incorretos'); }
-    });
-    cancelBtn.addEventListener('click', ()=>{ window.location.href='index.html'; });
-    logoutBtn.addEventListener('click', ()=>{ clearAuth(); location.reload(); });
-
-    // produtos util
-    function carregarProdutos(){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return [
-        {nome:'LifePod 8K',valorOriginal:'',valorPromo:'',sabores:[]},
-        {nome:'LifePod 10K',valorOriginal:'130.00',valorPromo:'',sabores:['Peach Mango','Strawberry Watermelon','Love 66','Menthol','Polar Ice','Grape Honeydew','Watermelon Ice','Passion Mango','Clear','Blackberry Ice','Mint Waterberry','Blueberry Mint']},
-        {nome:'LifePod 150K',valorOriginal:'',valorPromo:'',sabores:[]},
-        {nome:'Ignite 8K',valorOriginal:'',valorPromo:'',sabores:[]},
-        {nome:'Ignite 10K',valorOriginal:'',valorPromo:'',sabores:[]},
-        {nome:'Ignite 150K',valorOriginal:'',valorPromo:'',sabores:[]}
-      ];
-      try{ return JSON.parse(raw); }catch(e){ return []; }
-    }
-    function salvar(produtos){ localStorage.setItem(STORAGE_KEY, JSON.stringify(produtos)); window.dispatchEvent(new StorageEvent('storage',{key:STORAGE_KEY})); }
-
-    // render admin
-    function showAdmin(){ loginCard.classList.add('hidden'); adminArea.classList.remove('hidden'); renderProdutos(); }
-
-    function renderProdutos(){
-      const produtos = carregarProdutos();
-      produtosList.innerHTML = '';
-      produtos.forEach((p,idx)=>{
-        const el = document.createElement('div'); el.className='product';
-        el.innerHTML = `
-          <strong>${p.nome}</strong>
-          <div style="margin-top:8px">
-            <label>Valor Original</label>
-            <input type="text" id="orig_${idx}" value="${p.valorOriginal||''}">
-            <label>Valor Promoção (opcional)</label>
-            <input type="text" id="promo_${idx}" value="${p.valorPromo||''}">
-          </div>
-          <div style="margin-top:10px">
-            <label>Sabores (adicione um por vez)</label>
-            <ul id="listaSab_${idx}">${(p.sabores||[]).map((s,si)=>`<li>${s} <button data-idx="${idx}" data-si="${si}" class="rm-sabor">Remover</button></li>`).join('')}</ul>
-            <input type="text" id="novoSab_${idx}" placeholder="Novo sabor">
-            <button data-idx="${idx}" class="add-sabor btn-ghost">Adicionar sabor</button>
-          </div>
-          <div style="margin-top:10px;display:flex;gap:8px">
-            <button data-idx="${idx}" class="save-prod">Salvar</button>
-            <button data-idx="${idx}" class="del-prod btn-ghost">Excluir produto</button>
-          </div>
-        `;
-        produtosList.appendChild(el);
-      });
-
-      // hooks
-      document.querySelectorAll('.save-prod').forEach(btn=>btn.addEventListener('click', (e)=>{
-        const i = +e.currentTarget.getAttribute('data-idx');
-        const produtos = carregarProdutos();
-        produtos[i].valorOriginal = document.getElementById('orig_'+i).value.trim();
-        produtos[i].valorPromo = document.getElementById('promo_'+i).value.trim();
-        salvar(produtos); renderProdutos();
-      }));
-
-      document.querySelectorAll('.del-prod').forEach(btn=>btn.addEventListener('click', (e)=>{
-        if(!confirm('Excluir este produto?')) return;
-        const i = +e.currentTarget.getAttribute('data-idx');
-        const produtos = carregarProdutos(); produtos.splice(i,1); salvar(produtos); renderProdutos();
-      }));
-
-      document.querySelectorAll('.add-sabor').forEach(btn=>btn.addEventListener('click', (e)=>{
-        const i = +e.currentTarget.getAttribute('data-idx');
-        const valor = document.getElementById('novoSab_'+i).value.trim(); if(!valor) return alert('Digite um sabor');
-        const produtos = carregarProdutos(); produtos[i].sabores = produtos[i].sabores||[]; produtos[i].sabores.push(valor); document.getElementById('novoSab_'+i).value=''; salvar(produtos); renderProdutos();
-      }));
-
-      document.querySelectorAll('.rm-sabor').forEach(btn=>btn.addEventListener('click', (e)=>{
-        const i = +e.currentTarget.getAttribute('data-idx');
-        const si = +e.currentTarget.getAttribute('data-si');
-        const produtos = carregarProdutos(); produtos[i].sabores.splice(si,1); salvar(produtos); renderProdutos();
-      }));
-    }
-
-    addProductBtn.addEventListener('click', ()=>{
-      const nome = prompt('Nome do novo produto:'); if(!nome) return; const produtos = carregarProdutos(); produtos.push({nome:nome.trim(),valorOriginal:'',valorPromo:'',sabores:[]}); salvar(produtos); renderProdutos();
-    });
-
-    // export / import
-    exportBtn.addEventListener('click', ()=>{
-      const data = localStorage.getItem(STORAGE_KEY) || '[]';
-      const blob = new Blob([data],{type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='primezilla_produtos.json'; a.click(); URL.revokeObjectURL(url);
-    });
-    importBtn.addEventListener('click', ()=> fileInput.click());
-    fileInput.addEventListener('change',(e)=>{
-      const f = e.target.files[0]; if(!f) return; const reader = new FileReader(); reader.onload = (ev)=>{
-        try{ const parsed = JSON.parse(ev.target.result); if(Array.isArray(parsed)){ localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed)); alert('Importado com sucesso'); renderProdutos(); } else alert('Arquivo inválido'); }catch(err){ alert('Erro ao ler o arquivo'); }
-      }; reader.readAsText(f);
-    });
-
-    // quando localStorage mudar (outra aba), atualizar
-    window.addEventListener('storage',(e)=>{ if(e.key===STORAGE_KEY) renderProdutos(); });
-  </script>
+  <div id="adminArea" style="display:none">
+    <p id="status">Conectando...</p>
+    <button id="logout">Logout</button>
+    <hr>
+    <h3>Adicionar produto</h3>
+    <form id="addForm">
+      <input name="name" placeholder="Nome do produto" required><br><br>
+      <input name="price" placeholder="Preço (somente números)" ><br><br>
+      <select name="category">
+        <option value="pods">Pods</option>
+        <option value="acessorios">Acessórios</option>
+        <option value="eletronicos">Eletrônicos</option>
+        <option value="outros">Outros</option>
+      </select><br><br>
+      <select name="type">
+        <option value="pod">Pod (usar campo sabores)</option>
+        <option value="non-pod">Não-pod (usar cores)</option>
+      </select><br><br>
+      <input name="options" placeholder="Opções (separadas por vírgula) — sabores ou cores"><br><br>
+      <input type="file" name="image" accept="image/*"><br><br>
+      <button type="submit">Publicar produto</button>
+    </form>
+    <hr>
+    <p>Os produtos publicados aparecem automaticamente no site.</p>
+  </div>
+</div>
 </body>
 </html>
