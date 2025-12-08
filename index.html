@@ -24,58 +24,87 @@
   </section>
 
   <section class="catalog">
-    <div id="productsGrid" class="grid"></div>
+    <div id="productsGrid" class="grid">Carregando produtos...</div>
   </section>
 </main>
 
 <footer>© 2025 PrimeZilla</footer>
 
-<script>
-// Lê produtos.json e monta a grade
-async function loadProducts() {
-  try {
-    const res = await fetch('/produtos.json', {cache: "no-store"});
-    const products = await res.json();
-    const grid = document.getElementById('productsGrid');
-    grid.innerHTML = '';
-    products.filter(p=>p.active).forEach(p=>{
-      const imgSrc = (p.image && p.image.startsWith('data:')) ? p.image : (p.image || 'placeholder.png');
-      const priceText = p.price ? `${p.currency} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <img src="${imgSrc}" alt="${escapeHtml(p.name)}">
-        <h3>${escapeHtml(p.name)}</h3>
-        <p class="price">${priceText}</p>
-        <div class="actions">
-          <label>Qtd <select class="sel-qty"><option>1</option><option>2</option><option>3</option></select></label>
-          ${(p.type==='pod')?`<label>Sabor <select class="sel-variant">${(p.options||[]).map(o=>`<option>${o}</option>`).join('')}</select></label>`:
-          `<label>Cor <select class="sel-variant">${(p.options&&p.options.length)?(p.options.map(o=>`<option>${o}</option>`).join('')):`<option>-</option>`}</select></label>`}
-          <label>Pagamento <select class="sel-pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select></label>
-        </div>
-        <a class="botao whatsappBtn" href="#">Fazer pedido</a>
-      `;
-      // evento do botao
-      card.querySelector('.whatsappBtn').addEventListener('click', ()=>{
-        const qty = card.querySelector('.sel-qty').value;
-        const variant = card.querySelector('.sel-variant').value || '-';
-        const pay = card.querySelector('.sel-pay').value;
-        const valorText = p.price ? `${p.currency} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-        const variantLabel = (p.type==='pod') ? 'Sabor' : 'Cor';
-        const text = encodeURIComponent(`Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qty}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`);
-        const phone = '5567992018672';
-        window.open(`https://wa.me/${phone}?text=${text}`,'_blank');
-      });
-      grid.appendChild(card);
-    });
-  } catch (err) {
-    console.error(err);
-    document.getElementById('productsGrid').innerHTML = '<p>Erro ao carregar produtos.</p>';
-  }
-}
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-loadProducts();
-</script>
+<!-- Firebase & client script (módulo) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+  // --- seu firebaseConfig (já preenchido) ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+    authDomain: "primezilla-70b94.firebaseapp.com",
+    projectId: "primezilla-70b94",
+    storageBucket: "primezilla-70b94.firebasestorage.app",
+    appId: "1:910803172382:web:db82186d77b8281f13020f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // telefone do WhatsApp (sem +, sem espaços)
+  const PHONE = '5567992018672';
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  document.addEventListener('DOMContentLoaded', ()=> {
+    const container = document.getElementById('productsGrid');
+    container.innerHTML = '';
+
+    // consulta: todos os produtos ativos, ordenados por createdAt desc
+    const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+    onSnapshot(q, snap => {
+      container.innerHTML = '';
+      snap.forEach(doc => {
+        const p = doc.data();
+        if(!p.active) return;
+        const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+        const img = p.imageUrl || p.image || 'placeholder.png';
+        const card = document.createElement('div'); card.className = 'card';
+        card.innerHTML = `
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(p.name)}">
+          <h3>${escapeHtml(p.name)}</h3>
+          <p class="price">${escapeHtml(priceText)}</p>
+          <div class="controls">
+            <label>Qtd
+              <select class="qty"><option>1</option><option>2</option><option>3</option></select>
+            </label>
+            <label>${(p.type==='pod')? 'Sabor' : 'Cor'}
+              <select class="variant">${(p.options||[]).map(o=>`<option>${escapeHtml(o)}</option>`).join('')}</select>
+            </label>
+            <label>Pagamento
+              <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
+            </label>
+            <button class="btnBuy">Comprar (WhatsApp)</button>
+          </div>
+        `;
+        // evento botão
+        card.querySelector('.btnBuy').addEventListener('click', ()=>{
+          const qtd = card.querySelector('.qty').value;
+          const variant = card.querySelector('.variant').value || '-';
+          const pay = card.querySelector('.pay').value;
+          const valorText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+          const variantLabel = (p.type==='pod') ? 'Sabor' : 'Cor';
+          const text = encodeURIComponent(
+            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`
+          );
+          window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
+        });
+
+        container.appendChild(card);
+      });
+
+      if(container.innerHTML === '') container.innerHTML = '<p>Nenhum produto disponível.</p>';
+    }, err=>{
+      console.error(err);
+      container.innerHTML = '<p>Erro ao carregar produtos.</p>';
+    });
+  });
+</script>
 </body>
 </html>
