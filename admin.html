@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — PrimeZilla</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="wrap">
+  <h2>Admin — PrimeZilla</h2>
+
+  <div id="authArea">
+    <form id="loginForm">
+      <input id="email" placeholder="email" type="email" required><br><br>
+      <input id="password" placeholder="senha" type="password" required><br><br>
+      <button type="submit" class="botao">Entrar</button>
+    </form>
+    <p class="small">Crie o usuário admin no Firebase Console → Authentication → Add user</p>
+  </div>
+
+  <div id="adminArea" style="display:none">
+    <p><strong id="who"></strong> — <button id="logout" class="botao">Logout</button></p>
+    <hr>
+    <h3>Adicionar produto</h3>
+    <form id="addForm">
+      <input id="p_name" placeholder="Nome do produto" required><br><br>
+      <input id="p_price" placeholder="Preço (ex: 39.90)"><br><br>
+      <select id="p_cat"><option value="pods">Pods</option><option value="acessorios">Acessórios</option><option value="eletronicos">Eletrônicos</option><option value="outros">Outros</option></select><br><br>
+      <select id="p_type"><option value="pod">Pod (usar sabores)</option><option value="non-pod">Não-pod (usar cores)</option></select><br><br>
+      <input id="p_opts" placeholder="Opções separadas por vírgula (ex: Peach Mango, Menthol)"><br><br>
+      <input id="p_image" type="file" accept="image/*"><br><br>
+      <label><input id="p_active" type="checkbox" checked> Ativo</label><br><br>
+      <button type="submit" class="botao">Publicar produto</button>
+    </form>
+
+    <hr>
+    <h3>Produtos cadastrados</h3>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+  authDomain: "primezilla-70b94.firebaseapp.com",
+  projectId: "primezilla-70b94",
+  storageBucket: "primezilla-70b94.firebasestorage.app",
+  appId: "1:910803172382:web:db82186d77b8281f13020f"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const loginForm = document.getElementById('loginForm');
+const adminArea = document.getElementById('adminArea');
+const authArea = document.getElementById('authArea');
+const who = document.getElementById('who');
+const listEl = document.getElementById('list');
+const addForm = document.getElementById('addForm');
+
+loginForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const pass = document.getElementById('password').value;
+  try{
+    const userCred = await signInWithEmailAndPassword(auth, email, pass);
+    showAdmin(userCred.user.email);
+  }catch(err){
+    alert('Erro ao logar: '+err.message);
+  }
+});
+
+document.getElementById('logout').addEventListener('click', async ()=>{
+  await signOut(auth);
+  adminArea.style.display='none';
+  authArea.style.display='';
+});
+
+function showAdmin(email){
+  who.textContent = email;
+  authArea.style.display='none';
+  adminArea.style.display='';
+  loadList();
+}
+
+async function loadList(){
+  listEl.innerHTML = 'Carregando...';
+  const snap = await getDocs(collection(db,'products'));
+  listEl.innerHTML = '';
+  snap.forEach(d=>{
+    const p = d.data(); p._id = d.id;
+    const div = document.createElement('div'); div.style.border='1px solid #eee'; div.style.padding='10px'; div.style.marginBottom='8px';
+    div.innerHTML = `<strong>${p.name}</strong> — ${p.category} — ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}<br>
+      <button data-id="${p._id}" class="delBtn" style="margin-left:6px;background:#c0392b">Excluir</button>
+    `;
+    listEl.appendChild(div);
+  });
+
+  document.querySelectorAll('.delBtn').forEach(b=>b.addEventListener('click', async (e)=>{
+    if(!confirm('Excluir produto?')) return;
+    const id = e.currentTarget.dataset.id;
+    await deleteDoc(doc(db,'products',id));
+    loadList();
+  }));
+}
+
+addForm.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const name = document.getElementById('p_name').value.trim();
+  const price = parseFloat(document.getElementById('p_price').value) || null;
+  const category = document.getElementById('p_cat').value;
+  const type = document.getElementById('p_type').value;
+  const options = document.getElementById('p_opts').value.trim() ? document.getElementById('p_opts').value.split(',').map(s=>s.trim()) : [];
+  const file = document.getElementById('p_image').files[0];
+  const active = document.getElementById('p_active').checked;
+
+  let imageUrl = '';
+  if(file){
+    const path = `products/${Date.now()}_${file.name}`;
+    const stRef = ref(storage, path);
+    await uploadBytes(stRef, file);
+    imageUrl = await getDownloadURL(stRef);
+  }
+
+  await addDoc(collection(db,'products'), {
+    name, price, currency:'R$', category, type, options, imageUrl, active, createdAt: serverTimestamp()
+  });
+
+  alert('Produto publicado');
+  addForm.reset();
+  loadList();
+});
+</script>
+</body>
+</html>
