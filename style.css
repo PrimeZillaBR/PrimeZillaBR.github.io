@@ -1,6 +1,6 @@
-/:root{
+:root{
   --bg:#ffffff;
-  --primary:#007a3d; /* verde suave */
+  --primary:#007a3d;
   --text:#111111;
   --muted:#6b7280;
   --card:#f7f9f8;
@@ -15,7 +15,9 @@ nav a{margin:0 10px;text-decoration:none;color:var(--primary);font-weight:600}
 .card{background:var(--card);padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);text-align:center;box-shadow:0 6px 16px rgba(0,0,0,0.03)}
 .card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
 .price{font-weight:800;color:var(--primary);margin:8px 0}
-.botao{display:inline-block;padding:10px 12px;background:var(--primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:700}
-.catalog{max-width:1200px;margin:0 auto}
-.actions label{display:block;margin-bottom:6px}
+.botao{display:inline-block;padding:10px 12px;background:var(--primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;border:none;cursor:pointer}
+.wrap{max-width:980px;margin:18px auto;padding:12px}
+input, select{padding:8px;border-radius:6px;border:1px solid #e6eefb;width:100%;box-sizing:border-box}
+.small{color:var(--muted);font-size:13px}
+.controls{display:grid;gap:8px;margin-top:10px}
 @media(max-width:760px){.logo{height:52px}.grid{padding:12px}}
