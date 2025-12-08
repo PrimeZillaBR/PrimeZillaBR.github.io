@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — PrimeZilla</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div style="max-width:980px;margin:18px auto;padding:12px">
+  <h2>Admin — PrimeZilla</h2>
+  <p class="small">Modo GitHub: atualiza produtos.json no seu repo (recomendado). Modo Local: salva apenas no navegador.</p>
+
+  <div style="border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px">
+    <h3>Configuração GitHub (opcional para salvar no repo)</h3>
+    <p>Se quiser que o admin **publique** instantaneamente no GitHub, gere um <strong>Personal Access Token</strong> com escopo <code>repo</code> e cole abaixo.</p>
+    <label>Owner (seu usuário GitHub)</label>
+    <input id="ghOwner" placeholder="PrimeZillaBR"><br>
+    <label>Repo (nome do repo)</label>
+    <input id="ghRepo" placeholder="PrimeZillaBR.github.io"><br>
+    <label>Arquivo de dados (path)</label>
+    <input id="ghPath" value="produtos.json"><br>
+    <label>Personal Access Token (PAT)</label>
+    <input id="ghToken" placeholder="ghp_xxx (opcional)" style="width:100%"><br>
+    <button id="saveConfig" class="botao" style="margin-top:8px">Salvar Config</button>
+  </div>
+
+  <div style="border:1px solid #eee;padding:12px;border-radius:8px">
+    <h3>Adicionar / Editar Produto</h3>
+    <form id="productForm">
+      <label>Nome</label><input id="p_name" required><br>
+      <label>Preço (número)</label><input id="p_price" type="number" step="0.01"><br>
+      <label>Categoria</label><select id="p_cat"><option value="pods">Pods</option><option value="acessorios">Acessórios</option><option value="eletronicos">Eletrônicos</option><option value="outros">Outros</option></select><br>
+      <label>Tipo</label><select id="p_type"><option value="pod">Pod (usar sabores)</option><option value="non-pod">Não-pod (usar cores)</option></select><br>
+      <label>Opções (separadas por vírgula) — sabores ou cores</label><input id="p_opts" placeholder="Peach Mango, Menthol"><br>
+      <label>Imagem (arquivo) — será convertida em Base64</label><input id="p_image" type="file" accept="image/*"><br>
+      <label><input type="checkbox" id="p_active" checked> Ativo</label><br>
+      <input type="hidden" id="p_id">
+      <div style="margin-top:8px">
+        <button type="submit" class="botao">Salvar Produto</button>
+        <button type="button" id="exportBtn" class="botao" style="background:#444;margin-left:8px">Exportar JSON</button>
+      </div>
+    </form>
+  </div>
+
+  <hr>
+  <h3>Produtos cadastrados</h3>
+  <div id="list"></div>
+  <p style="margin-top:18px;color:#666">Obs: sem token, altera apenas no seu navegador (localStorage). Com token válido, salva no repo especificado.</p>
+</div>
+
+<script>
+// util
+function el(id){return document.getElementById(id);}
+function uid(){return 'p_'+Math.random().toString(36).slice(2,9);}
+
+// carregar config do localStorage
+const CFG_KEY = 'pz_cfg';
+let cfg = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+if(cfg.owner) el('ghOwner').value = cfg.owner;
+if(cfg.repo) el('ghRepo').value = cfg.repo;
+if(cfg.path) el('ghPath').value = cfg.path;
+
+// produtos local
+const PROD_KEY = 'pz_products';
+let products = JSON.parse(localStorage.getItem(PROD_KEY) || '[]');
+
+function saveLocal(){
+  localStorage.setItem(PROD_KEY, JSON.stringify(products));
+}
+
+// render lista
+function renderList(){
+  const list = el('list'); list.innerHTML = '';
+  products.forEach(p=>{
+    const div = document.createElement('div'); div.style.border='1px solid #eee'; div.style.padding='10px'; div.style.marginBottom='8px';
+    div.innerHTML = `<strong>${p.name}</strong> — ${p.category} — ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}<br>
+      <button data-id="${p.id}" class="editBtn">Editar</button>
+      <button data-id="${p.id}" class="delBtn" style="margin-left:6px;background:#c0392b">Excluir</button>
+    `;
+    list.appendChild(div);
+  });
+  document.querySelectorAll('.editBtn').forEach(b=>b.addEventListener('click', e=>{
+    const id = e.currentTarget.dataset.id;
+    const p = products.find(x=>x.id===id);
+    if(!p) return;
+    el('p_id').value=p.id; el('p_name').value=p.name; el('p_price').value=p.price || '';
+    el('p_cat').value=p.category; el('p_type').value=p.type; el('p_opts').value=(p.options||[]).join(', ');
+    el('p_active').checked = !!p.active;
+    window.scrollTo(0,0);
+  }));
+  document.querySelectorAll('.delBtn').forEach(b=>b.addEventListener('click', async e=>{
+    if(!confirm('Excluir produto?')) return;
+    const id = e.currentTarget.dataset.id;
+    products = products.filter(x=>x.id!==id);
+    saveLocal(); renderList();
+    // se config com token -> push para github
+    if(cfg.token && cfg.owner && cfg.repo) await pushToGitHub();
+  }));
+}
+
+renderList();
+
+// salvar config
+el('saveConfig').addEventListener('click', ()=>{
+  cfg.owner = el('ghOwner').value.trim();
+  cfg.repo = el('ghRepo').value.trim();
+  cfg.path = el('ghPath').value.trim() || 'produtos.json';
+  cfg.token = el('ghToken').value.trim();
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+  alert('Config salva localmente. Se inseriu token válido, admin gravará no repo.');
+});
+
+// submit product
+el('productForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const id = el('p_id').value || uid();
+  const name = el('p_name').value.trim();
+  const price = parseFloat(el('p_price').value) || null;
+  const category = el('p_cat').value;
+  const type = el('p_type').value;
+  const options = el('p_opts').value.trim() ? el('p_opts').value.split(',').map(s=>s.trim()) : [];
+  const file = el('p_image').files[0];
+  const active = el('p_active').checked;
+  let imageData = null;
+
+  if(file){
+    imageData = await toBase64(file);
+  }
+
+  // update or add
+  const existing = products.find(x=>x.id===id);
+  const prodObj = {
+    id, name, price, currency: 'R$', category, type, options, active,
+    image: imageData || (existing?existing.image:null)
+  };
+  if(existing){
+    products = products.map(x=> x.id===id ? prodObj : x);
+  } else {
+    products.unshift(prodObj);
+  }
+  saveLocal(); renderList();
+  // push to GitHub if token set
+  if(cfg.token && cfg.owner && cfg.repo){
+    await pushToGitHub();
+  } else {
+    alert('Produto salvo localmente. Sem token, ficará apenas no seu navegador.');
+  }
+  // reset form
+  el('productForm').reset(); el('p_id').value='';
+});
+
+// export JSON
+el('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(products, null, 2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='produtos.json'; a.click();
+});
+
+// base64 helper
+function toBase64(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(file);}); }
+
+// GITHUB functions
+async function getFileSha(){
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+  const r = await fetch(url, {headers:{Authorization:'token '+cfg.token}});
+  if(r.status===200){
+    const j = await r.json();
+    return j.sha;
+  } else if(r.status===404){
+    return null;
+  } else {
+    throw new Error('Erro ao obter SHA: '+r.status);
+  }
+}
+async function pushToGitHub(){
+  try{
+    const sha = await getFileSha();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2))));
+    const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+    const body = {
+      message: 'Atualizar produtos via Admin',
+      content,
+      branch: 'main'
+    };
+    if(sha) body.sha = sha;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: 'token '+cfg.token,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if(res.status===201 || res.status===200){
+      alert('Produtos enviados ao GitHub com sucesso. Aguarde o Pages atualizar ( ~1 min ).');
+    } else {
+      const txt = await res.text();
+      alert('Erro ao enviar ao GitHub: '+res.status + ' — ' + txt);
+    }
+  }catch(err){ alert('Erro pushToGitHub: '+err.message); }
+}
+</script>
+</body>
+</html>
