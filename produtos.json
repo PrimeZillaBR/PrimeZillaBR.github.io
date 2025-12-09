@@ -1,16 +1,1 @@
-[
-  {
-    "name": "life pod 10k + case",
-    "price": 130,
-    "currency": "R$",
-    "category": "pods",
-    "type": "pod",
-    "options": [
-      "mentol",
-      "morango",
-      "ice"
-    ],
-    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765319901/bgiquemtanprjwynltvn.jpg",
-    "active": true
-  }
-]
+[]
