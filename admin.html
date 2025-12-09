@@ -1,138 +1,280 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — PrimeZilla</title><link rel="stylesheet" href="style.css"></head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — PrimeZilla</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ajustes rapidos para admin (mantive sua paleta) */
+    .small{color:#9fb6c3;font-size:13px}
+    .wrap{max-width:980px;margin:18px auto;padding:12px}
+    #loginCard, #panel{background:linear-gradient(180deg,#071226,#041827);padding:18px;border-radius:12px;border:1px solid rgba(0,212,255,0.06)}
+    input, select {padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#061427;color:#e6f7ff;width:100%;box-sizing:border-box}
+    .botao{background:linear-gradient(90deg,#00d4ff,#007ac1);color:#001826;padding:10px;border-radius:8px;border:none;cursor:pointer}
+    .muted{color:#9fb6c3}
+    .prod-row{display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,0.03);padding:8px;margin-bottom:8px}
+    .prod-row img{width:80px;height:80px;object-fit:cover;border-radius:6px}
+    .right{margin-left:auto}
+    .danger{background:#c0392b;color:white;border:none;padding:6px 8px;border-radius:6px;cursor:pointer}
+  </style>
+</head>
 <body>
-<div class="wrap">
-  <h2>Admin — PrimeZilla</h2>
+  <div class="wrap">
+    <h2 class="muted">Painel Admin — PrimeZilla</h2>
 
-  <div id="authArea">
-    <form id="loginForm">
-      <input id="email" placeholder="email" type="email" required><br><br>
-      <input id="password" placeholder="senha" type="password" required><br><br>
-      <button type="submit" class="botao">Entrar</button>
-    </form>
-    <p class="small">Crie o usuário admin no Firebase Console → Authentication → Add user</p>
+    <div id="loginCard">
+      <h3 class="muted">Login</h3>
+      <p class="small">Use as credenciais do admin</p>
+
+      <label>Email (usuário)</label>
+      <input id="loginUser" placeholder="email">
+      <label>Senha</label>
+      <input id="loginPass" type="password" placeholder="senha">
+      <label>GitHub Personal Access Token (cole aqui)</label>
+      <input id="githubToken" placeholder="token com permissão repo (ex: ghp_...)">
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="btnLogin" class="botao">Entrar</button>
+        <button id="btnLogout" class="botao" style="display:none;background:#444">Sair</button>
+      </div>
+      <p class="small" style="margin-top:8px">OBS: o token é usado **somente** para salvar/atualizar <code>produtos.json</code> no seu repositório. Ele não é enviado para nenhum servidor externo.</p>
+    </div>
+
+    <div id="panel" style="margin-top:14px;display:none">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div><strong id="who"></strong></div>
+        <div style="margin-left:auto">
+          <button id="refreshList" class="botao">Recarregar lista</button>
+          <button id="logoutBtn" class="botao" style="background:#c0392b">Logout</button>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+
+      <h3 class="muted">Adicionar produto</h3>
+      <form id="addForm">
+        <label>Nome</label>
+        <input id="p_name" required>
+        <label style="margin-top:8px">Preço (apenas números)</label>
+        <input id="p_price" placeholder="39.90">
+        <label style="margin-top:8px">Categoria</label>
+        <select id="p_cat"><option value="pods">Pods</option><option value="acessorios">Acessórios</option><option value="eletronicos">Eletrônicos</option><option value="outros">Outros</option></select>
+        <label style="margin-top:8px">Tipo</label>
+        <select id="p_type"><option value="pod">Pod (usar sabores)</option><option value="non-pod">Não-pod (usar cores)</option></select>
+        <label style="margin-top:8px">Opções (separadas por vírgula) — sabores ou cores</label>
+        <input id="p_opts" placeholder="Ex: Peach Mango, Menthol, Watermelon">
+        <label style="margin-top:8px">Imagem</label>
+        <input id="p_image" type="file" accept="image/*">
+        <label style="margin-top:8px"><input id="p_active" type="checkbox" checked> Ativo</label>
+        <div style="margin-top:10px"><button class="botao" id="publishBtn">Publicar produto</button></div>
+      </form>
+
+      <hr style="margin:12px 0">
+
+      <h3 class="muted">Produtos cadastrados</h3>
+      <div id="list"></div>
+    </div>
   </div>
 
-  <div id="adminArea" style="display:none">
-    <p><strong id="who"></strong> — <button id="logout" class="botao">Logout</button></p>
-    <hr>
-    <h3>Adicionar produto</h3>
-    <form id="addForm">
-      <input id="p_name" placeholder="Nome do produto" required><br><br>
-      <input id="p_price" placeholder="Preço (ex: 39.90)"><br><br>
-      <select id="p_cat"><option value="pods">Pods</option><option value="acessorios">Acessórios</option><option value="eletronicos">Eletrônicos</option><option value="outros">Outros</option></select><br><br>
-      <select id="p_type"><option value="pod">Pod (usar sabores)</option><option value="non-pod">Não-pod (usar cores)</option></select><br><br>
-      <input id="p_opts" placeholder="Opções separadas por vírgula (ex: Peach Mango, Menthol)"><br><br>
-      <input id="p_image" type="file" accept="image/*"><br><br>
-      <label><input id="p_active" type="checkbox" checked> Ativo</label><br><br>
-      <button type="submit" class="botao">Publicar produto</button>
-    </form>
+<script>
+/*
+  Admin sem Firebase:
+  - Login local (credenciais definidas abaixo)
+  - Faz upload para Cloudinary (unsigned preset)
+  - Atualiza produtos.json no GitHub via API (token necessário)
+*/
 
-    <hr>
-    <h3>Produtos cadastrados</h3>
-    <div id="list"></div>
-  </div>
-</div>
+const ADMIN_USER = 'admin@primezilla.com';
+const ADMIN_PASS = 'PrimeZilla@2025';
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+// Cloudinary config (user provided)
+const CLOUD_NAME = 'duwsueept';
+const UPLOAD_PRESET = 'produtos_preset';
+const CLOUDINARY_API = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-  authDomain: "primezilla-70b94.firebaseapp.com",
-  projectId: "primezilla-70b94",
-  storageBucket: "primezilla-70b94.firebasestorage.app",
-  appId: "1:910803172382:web:db82186d77b8281f13020f"
-};
+// GitHub repo config
+const GITHUB_OWNER = 'PrimeZillaBR';
+const GITHUB_REPO = 'PrimeZillaBR.github.io';
+const PRODUTOS_PATH = 'produtos.json';
+const GITHUB_API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${PRODUTOS_PATH}`;
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+let GH_TOKEN = ''; // será preenchido no login
+let currentUser = null;
 
-const loginForm = document.getElementById('loginForm');
-const adminArea = document.getElementById('adminArea');
-const authArea = document.getElementById('authArea');
-const who = document.getElementById('who');
-const listEl = document.getElementById('list');
-const addForm = document.getElementById('addForm');
+const el = id => document.getElementById(id);
+const show = (sel) => document.querySelector(sel).style.display = '';
+const hide = (sel) => document.querySelector(sel).style.display = 'none';
 
-loginForm.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const email = document.getElementById('email').value;
-  const pass = document.getElementById('password').value;
-  try{
-    const userCred = await signInWithEmailAndPassword(auth, email, pass);
-    showAdmin(userCred.user.email);
-  }catch(err){
-    alert('Erro ao logar: '+err.message);
-  }
-});
-
-document.getElementById('logout').addEventListener('click', async ()=>{
-  await signOut(auth);
-  adminArea.style.display='none';
-  authArea.style.display='';
-});
-
-function showAdmin(email){
-  who.textContent = email;
-  authArea.style.display='none';
-  adminArea.style.display='';
-  loadList();
-}
-
-async function loadList(){
-  listEl.innerHTML = 'Carregando...';
-  const snap = await getDocs(collection(db,'products'));
-  listEl.innerHTML = '';
-  snap.forEach(d=>{
-    const p = d.data(); p._id = d.id;
-    const div = document.createElement('div'); div.style.border='1px solid #eee'; div.style.padding='10px'; div.style.marginBottom='8px';
-    div.innerHTML = `<strong>${p.name}</strong> — ${p.category} — ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}<br>
-      <button data-id="${p._id}" class="delBtn" style="margin-left:6px;background:#c0392b">Excluir</button>
-    `;
-    listEl.appendChild(div);
-  });
-
-  document.querySelectorAll('.delBtn').forEach(b=>b.addEventListener('click', async (e)=>{
-    if(!confirm('Excluir produto?')) return;
-    const id = e.currentTarget.dataset.id;
-    await deleteDoc(doc(db,'products',id));
+// login
+el('btnLogin').addEventListener('click', ()=>{
+  const u = el('loginUser').value.trim();
+  const p = el('loginPass').value;
+  const token = el('githubToken').value.trim();
+  if(!u || !p) return alert('Preencha usuário e senha');
+  if(u === ADMIN_USER && p === ADMIN_PASS){
+    GH_TOKEN = token;
+    currentUser = u;
+    el('who').textContent = u;
+    el('loginCard').style.display = 'none';
+    el('panel').style.display = '';
+    el('btnLogout').style.display = '';
     loadList();
-  }));
+  } else {
+    alert('Usuário ou senha incorretos');
+  }
+});
+el('btnLogout').addEventListener('click', ()=> location.reload());
+el('logoutBtn').addEventListener('click', ()=> location.reload());
+
+// upload image to Cloudinary (unsigned preset)
+async function uploadToCloudinary(file){
+  if(!file) return '';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  // we can request transformations cloudinary side later
+  const res = await fetch(CLOUDINARY_API, { method:'POST', body: fd });
+  if(!res.ok) throw new Error('Erro upload Cloudinary: ' + res.status);
+  const data = await res.json();
+  // return secure_url (already hosted)
+  return data.secure_url;
 }
 
-addForm.addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  const name = document.getElementById('p_name').value.trim();
-  const price = parseFloat(document.getElementById('p_price').value) || null;
-  const category = document.getElementById('p_cat').value;
-  const type = document.getElementById('p_type').value;
-  const options = document.getElementById('p_opts').value.trim() ? document.getElementById('p_opts').value.split(',').map(s=>s.trim()) : [];
-  const file = document.getElementById('p_image').files[0];
-  const active = document.getElementById('p_active').checked;
+// helper: get current produtos.json from GitHub (returns {sha, contentArray})
+async function fetchProdutosFromGitHub(){
+  const headers = { Accept: 'application/vnd.github.v3+json' };
+  if(GH_TOKEN) headers.Authorization = 'token ' + GH_TOKEN;
+  const res = await fetch(GITHUB_API_BASE, { headers });
+  if(res.status === 404) return { sha: null, list: [] };
+  if(!res.ok) throw new Error('Erro ao buscar produtos.json: ' + res.status);
+  const j = await res.json();
+  const sha = j.sha;
+  const content = atob(j.content.replace(/\n/g,'')); // base64 -> string
+  let list = [];
+  try { list = JSON.parse(content); } catch(e){ list = []; }
+  return { sha, list };
+}
 
-  let imageUrl = '';
-  if(file){
-    const path = `products/${Date.now()}_${file.name}`;
-    const stRef = ref(storage, path);
-    await uploadBytes(stRef, file);
-    imageUrl = await getDownloadURL(stRef);
-  }
-
-  await addDoc(collection(db,'products'), {
-    name, price, currency:'R$', category, type, options, imageUrl, active, createdAt: serverTimestamp()
+// helper: save produtos.json on GitHub (create or update)
+async function saveProdutosToGitHub(list, sha){
+  if(!GH_TOKEN) throw new Error('Token do GitHub não informado. Cole-o no campo de login.');
+  const body = {
+    message: 'Atualização produtos via Admin',
+    content: btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2)))),
+    committer: { name: 'PrimeZilla Admin', email: 'admin@primezilla.com' }
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(GITHUB_API_BASE, {
+    method: 'PUT',
+    headers: {
+      Authorization: 'token ' + GH_TOKEN,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
   });
+  if(!res.ok){
+    const txt = await res.text();
+    throw new Error('Erro ao salvar produtos.json: ' + res.status + ' — ' + txt);
+  }
+  return await res.json();
+}
 
-  alert('Produto publicado');
-  addForm.reset();
-  loadList();
+// render list
+async function loadList(){
+  try {
+    el('list').innerHTML = 'Carregando...';
+    const { sha, list } = await fetchProdutosFromGitHub();
+    window.__produtos_sha = sha;
+    window.__produtos_list = list;
+    renderList(list);
+  } catch(err){
+    el('list').innerHTML = '<p class="small">Erro ao carregar produtos: ' + err.message + '</p>';
+    console.error(err);
+  }
+}
+
+function renderList(list){
+  const wrap = el('list');
+  wrap.innerHTML = '';
+  if(!list.length){ wrap.innerHTML = '<p class="small">Nenhum produto publicado.</p>'; return; }
+  list.forEach((p, idx) => {
+    const div = document.createElement('div'); div.className='prod-row';
+    const img = document.createElement('img'); img.src = p.imageUrl || 'placeholder.png';
+    const info = document.createElement('div'); info.innerHTML = `<strong>${p.name}</strong><br><span class="small">${p.category} • ${p.type} • ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}</span>`;
+    const right = document.createElement('div'); right.className='right';
+    const del = document.createElement('button'); del.className='danger'; del.textContent='Excluir'; del.addEventListener('click', ()=> removeProduct(idx));
+    right.appendChild(del);
+    div.appendChild(img); div.appendChild(info); div.appendChild(right);
+    wrap.appendChild(div);
+  });
+}
+
+// remove product
+async function removeProduct(index){
+  if(!confirm('Excluir produto?')) return;
+  try{
+    const { sha, list } = await fetchProdutosFromGitHub();
+    list.splice(index,1);
+    await saveProdutosToGitHub(list, sha);
+    alert('Produto excluído');
+    loadList();
+  }catch(err){
+    alert('Falha ao excluir: ' + err.message);
+    console.error(err);
+  }
+}
+
+// publish product - handler
+el('publishBtn').addEventListener('click', async (e)=>{
+  e.preventDefault();
+  try{
+    const name = el('p_name').value.trim(); if(!name) return alert('Preencha nome');
+    const price = parseFloat(el('p_price').value) || null;
+    const category = el('p_cat').value;
+    const type = el('p_type').value;
+    const options = el('p_opts').value.trim() ? el('p_opts').value.split(',').map(s=>s.trim()) : [];
+    const file = el('p_image').files[0];
+    const active = el('p_active').checked;
+
+    el('publishBtn').disabled = true;
+    el('publishBtn').textContent = 'Publicando...';
+
+    // upload imagem
+    let imageUrl = '';
+    if(file){
+      imageUrl = await uploadToCloudinary(file);
+      // optional: transform url to square crop (Cloudinary transformation)
+      // we'll request a centered crop using cloudinary params
+      // if secure_url like .../upload/vxxxxx/filename.jpg
+      // we can insert /c_fill,g_auto,w_800,h_800/ after /upload/
+      imageUrl = imageUrl.replace('/upload/','/upload/c_fill,g_auto,w_800,h_800/');
+    }
+
+    // build product
+    const product = {
+      name, price, currency: 'R$', category, type, options, imageUrl, active
+    };
+
+    // fetch existing list and append
+    const { sha, list } = await fetchProdutosFromGitHub();
+    list.unshift(product); // colocar no topo
+    await saveProdutosToGitHub(list, sha);
+    alert('Produto publicado com sucesso');
+    el('addForm').reset();
+    loadList();
+  }catch(err){
+    alert('Erro ao publicar: ' + err.message);
+    console.error(err);
+  }finally{
+    el('publishBtn').disabled = false;
+    el('publishBtn').textContent = 'Publicar produto';
+  }
 });
+
+// refresh
+el('refreshList').addEventListener('click', loadList);
+
 </script>
 </body>
 </html>
