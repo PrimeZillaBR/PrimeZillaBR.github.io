@@ -1,5 +1,15 @@
 [
   {
+    "name": "logo",
+    "price": null,
+    "currency": "R$",
+    "category": "pods",
+    "type": "pod",
+    "options": [],
+    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765320627/ersuwnmpqepkaosb85gf.jpg",
+    "active": true
+  },
+  {
     "name": "life pod 10k + case",
     "price": 130,
     "currency": "R$",
