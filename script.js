@@ -1,3 +1,16 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD1VSEtXVbAdmVFxH1PDOyjTXGYX9so",
+  authDomain: "primezilla-70894.firebaseapp.com",
+  projectId: "primezilla-70894",
+  storageBucket: "primezilla-70894.appspot.com",
+  appId: "1:910889123782:web:b012886d70b287181302e0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 // script.js - Carrega produtos do produtos.json e renderiza no site
 
 const PHONE = "5567992018672"; // Seu WhatsApp
