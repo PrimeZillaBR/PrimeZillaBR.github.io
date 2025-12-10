@@ -21,6 +21,7 @@
 
 <main class="container">
   <h2>Produtos</h2>
+
   <div class="cats">
     <button class="catBtn" data-cat="all">Todos</button>
     <button class="catBtn" data-cat="pods">Pods</button>
@@ -28,6 +29,7 @@
     <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
     <button class="catBtn" data-cat="outros">Outros</button>
   </div>
+
   <div id="productsGrid" class="grid">Carregando...</div>
 </main>
 
@@ -51,7 +53,7 @@ const PHONE = "5567992018672";
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Segurança contra caracteres HTML
+// Segurança
 function esc(s){
   return String(s||'').replace(/[&<>"']/g, m =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])
@@ -61,33 +63,27 @@ function esc(s){
 const grid = document.getElementById('productsGrid');
 const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
 
-let produtos = [];
-
 onSnapshot(q, snap => {
-  produtos = [];
-  snap.forEach(d => produtos.push(d.data()));
-  render("all");
-}, err => {
+  const arr = [];
+  snap.forEach(d => arr.push(d.data()));
+  render(arr, "all");
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.onclick = () => render(arr, btn.dataset.cat);
+  });
+}, err=>{
   grid.innerHTML = "<p>Erro ao carregar produtos.</p>";
   console.error(err);
 });
 
-document.querySelectorAll(".catBtn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    render(btn.dataset.cat);
-  });
-});
-
-function render(cat){
+function render(list, filter){
   grid.innerHTML = "";
-
-  produtos.forEach(p => {
+  list.forEach(p=>{
     if(!p.active) return;
-    if(cat !== "all" && p.category !== cat) return;
+    if(filter !== "all" && p.category !== filter) return;
 
     const img = p.imageUrl || p.image || "placeholder.png";
     const priceText = p.price
-      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+      ? `${p.currency || "R$"} ${Number(p.price).toFixed(2)}`
       : "Consultar valores";
 
     const el = document.createElement("div");
@@ -99,11 +95,11 @@ function render(cat){
       <a class="botao buy">Comprar</a>
     `;
 
-    el.querySelector(".buy").addEventListener("click", () => {
+    el.querySelector(".buy").addEventListener("click",()=>{
       const variantLabel = (p.type === "pod") ? "Sabor" : "Cor";
       const variant = (p.options && p.options[0]) ? p.options[0] : "-";
       const text = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}
+`Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
 ${variantLabel}: ${variant}
 Valor: ${priceText}
