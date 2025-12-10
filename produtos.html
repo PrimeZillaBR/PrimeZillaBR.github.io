@@ -1,119 +1,75 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Produtos — PrimeZilla</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="topo">
-  <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/ersuwnmpqepkaosb85gf" class="logo" alt="PrimeZilla">
-  </div>
-  <nav class="nav">
-    <a href="index.html">Início</a>
-    <a href="produtos.html" class="ativo">Produtos</a>
-    <a href="admin.html">Admin</a>
-    <a href="contato.html">Contato</a>
-  </nav>
-</header>
-
-<main class="container">
-  <h2>Produtos</h2>
-
-  <div class="cats">
-    <button class="catBtn" data-cat="all">Todos</button>
-    <button class="catBtn" data-cat="pods">Pods</button>
-    <button class="catBtn" data-cat="acessorios">Acessórios</button>
-    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
-    <button class="catBtn" data-cat="outros">Outros</button>
-  </div>
-
-  <div id="productsGrid" class="grid">Carregando...</div>
-</main>
-
-<footer class="footer">
-  © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
-</footer>
-
-
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-    authDomain: "primezilla-70b94.firebaseapp.com",
-    projectId: "primezilla-70b94",
-    storageBucket: "primezilla-70b94.firebasestorage.app",
-    appId: "1:910803172382:web:db82186d77b8281f13020f"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+  authDomain: "primezilla-70b94.firebaseapp.com",
+  projectId: "primezilla-70b94",
+  storageBucket: "primezilla-70b94.firebasestorage.app",
+  appId: "1:910803172382:web:db82186d77b8281f13020f"
+};
 
-  const PHONE = '5567992018672';
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const PHONE = '5567992018672';
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-  function esc(s){
-    return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-  const grid = document.getElementById('productsGrid');
-  const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+const grid = document.getElementById('productsGrid');
 
-  onSnapshot(q, snap => {
-    const arr = [];
-    snap.forEach(d => arr.push(d.data()));
-    render(arr, 'all');
+// login anônimo para poder ler quando regras requerem auth (se você optar por exigir auth)
+signInAnonymously(auth).catch(()=>{ /* ignora se falhar - leitura pública também funciona */ });
 
-    document.querySelectorAll('.catBtn').forEach(btn => {
-      btn.onclick = () => render(arr, btn.dataset.cat);
+// Query: tenta ordenar por createdAt, mas se não existir, ainda retorna (no onSnapshot)
+const q = query(collection(db, 'products'), orderBy('createdAt','desc'));
+onSnapshot(q, snap => {
+  const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render(products, 'all');
+
+  document.querySelectorAll('.catBtn').forEach(btn => {
+    btn.onclick = () => render(products, btn.dataset.cat);
+  });
+}, err => {
+  console.error(err);
+  grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+});
+
+function normalizeCat(v){
+  if(!v) return '';
+  return v.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+
+function render(list, cat){
+  grid.innerHTML = '';
+  const wanted = normalizeCat(cat);
+
+  list.forEach(p => {
+    // garantia: normalize category from doc
+    const pcat = normalizeCat(p.category);
+    if(!p.active) return;
+    if(wanted !== 'all' && pcat !== wanted) return;
+
+    const img = p.imageUrl || p.image || 'placeholder.png';
+    const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `
+      <img src="${esc(img)}" alt="${esc(p.name)}">
+      <h3>${esc(p.name)}</h3>
+      <p class="price">${esc(priceText)}</p>
+      <a class="botao buy">Comprar</a>
+    `;
+    el.querySelector('.buy').addEventListener('click', ()=>{
+      const text = encodeURIComponent(`Olá! Tenho interesse no produto: ${p.name}\nQuantidade: 1\nValor: ${priceText}\nForma de Pagamento: PIX`);
+      window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
     });
-  }, err => {
-    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-    console.error(err);
+    grid.appendChild(el);
   });
 
-  function render(list, filter){
-    grid.innerHTML = '';
-    list.forEach(p => {
-
-      if(!p.active) return;
-      if(filter !== 'all' && p.category !== filter) return;
-
-      const img = p.imageUrl || p.image || 'placeholder.png';
-      const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-
-      const el = document.createElement('div');
-      el.className = 'card';
-      el.innerHTML = `
-        <img src="${esc(img)}" alt="${esc(p.name)}">
-        <h3>${esc(p.name)}</h3>
-        <p class="price">${esc(priceText)}</p>
-        <a class="botao buy">Comprar</a>
-      `;
-
-      el.querySelector('.buy').addEventListener('click', () => {
-        const variantLabel = (p.type === 'pod') ? 'Sabor' : 'Cor';
-        const variant = (p.options && p.options[0]) ? p.options[0] : '-';
-        const text = encodeURIComponent(
-          `Olá! Tenho interesse no produto: ${p.name}
-Quantidade: 1
-${variantLabel}: ${variant}
-Valor: ${priceText}
-Forma de Pagamento: PIX`
-        );
-        window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
-      });
-
-      grid.appendChild(el);
-    });
-
-    if(grid.children.length === 0){
-      grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
-    }
-  }
+  if(grid.children.length === 0) grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
+}
 </script>
-
-</body>
-</html>
