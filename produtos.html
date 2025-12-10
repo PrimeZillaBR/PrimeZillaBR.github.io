@@ -1,108 +1,71 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Produtos — PrimeZilla</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="topo">
-  <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/ersuwnmpqepkaosb85gf" class="logo" alt="PrimeZilla">
-  </div>
-  <nav class="nav">
-    <a href="index.html">Início</a>
-    <a href="produtos.html" class="ativo">Produtos</a>
-    <a href="admin.html">Admin</a>
-    <a href="contato.html">Contato</a>
-  </nav>
-</header>
-
-<main class="container">
-  <h2>Produtos</h2>
-  <div class="cats">
-    <button class="catBtn" data-cat="all">Todos</button>
-    <button class="catBtn" data-cat="pods">Pods</button>
-    <button class="catBtn" data-cat="acessorios">Acessórios</button>
-    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
-    <button class="catBtn" data-cat="outros">Outros</button>
-  </div>
-  <div id="productsGrid" class="grid">Carregando...</div>
-</main>
-
-<footer class="footer">
-  © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
-</footer>
-
 <script type="module">
-document.addEventListener('DOMContentLoaded', ()=>{
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+  authDomain: "primezilla-70b94.firebaseapp.com",
+  projectId: "primezilla-70b94",
+  storageBucket: "primezilla-70b94.firebasestorage.app",
+  appId: "1:910803172382:web:db82186d77b8281f13020f"
+};
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-    authDomain: "primezilla-70b94.firebaseapp.com",
-    projectId: "primezilla-70b94",
-    storageBucket: "primezilla-70b94.firebasestorage.app",
-    appId: "1:910803172382:web:db82186d77b8281f13020f"
-  };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const PHONE = '5567992018672';
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const PHONE = '5567992018672';
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
-  function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+const grid = document.getElementById('productsGrid');
 
-  const grid = document.getElementById('productsGrid');
-  const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+onSnapshot(q, snap => {
+  const arr = [];
+  snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
+  render(arr,'all');
+  document.querySelectorAll('.catBtn').forEach(b =>
+    b.onclick = ()=> render(arr, b.dataset.cat)
+  );
+}, err=>{
+  grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  console.error(err);
+});
 
-  onSnapshot(q, snap => {
-    const arr = [];
-    snap.forEach(d=> arr.push(d.data()));
-    render(arr,'all');
-    document.querySelectorAll('.catBtn').forEach(b =>
-      b.onclick = ()=> render(arr, b.dataset.cat)
-    );
-  }, err=>{
-    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-    console.error(err);
-  });
+function render(list, filter){
+  grid.innerHTML = '';
+  list.forEach(p=>{
+    if(!p.active) return;
+    if(filter!=='all' && p.category !== filter) return;
 
-  function render(list, filter){
-    grid.innerHTML = '';
-    list.forEach(p=>{
-      if(!p.active) return;
-      if(filter!=='all' && p.category !== filter) return;
-      const img = p.imageUrl || p.image || 'placeholder.png';
-      const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-      const el = document.createElement('div');
-      el.className='card';
-      el.innerHTML = `
-        <img src="${esc(img)}" alt="${esc(p.name)}">
-        <h3>${esc(p.name)}</h3>
-        <p class="price">${esc(priceText)}</p>
-        <a class="botao buy">Comprar</a>
-      `;
-      el.querySelector('.buy').addEventListener('click', ()=>{
-        const variantLabel = (p.type==='pod')? 'Sabor' : 'Cor';
-        const variant = (p.options && p.options[0])? p.options[0] : '-';
-        const text = encodeURIComponent(
-          \`Olá! Tenho interesse no produto: ${p.name}
+    const img = p.imageUrl || p.image || 'placeholder.png';
+    const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+
+    const el = document.createElement('div');
+    el.className='card';
+    el.innerHTML = `
+      <img src="${esc(img)}" alt="${esc(p.name)}">
+      <h3>${esc(p.name)}</h3>
+      <p class="price">${esc(priceText)}</p>
+      <a class="botao buy">Comprar</a>
+    `;
+
+    el.querySelector('.buy').addEventListener('click', ()=>{
+      const variantLabel = (p.type==='pod')? 'Sabor' : 'Cor';
+      const variant = (p.options && p.options[0])? p.options[0] : '-';
+      const text = encodeURIComponent(
+`Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
 ${variantLabel}: ${variant}
 Valor: ${priceText}
-Forma de Pagamento: PIX\`
-        );
-        window.open(\`https://wa.me/${PHONE}?text=${text}\`,'_blank');
-      });
-      grid.appendChild(el);
+Forma de Pagamento: PIX`
+      );
+      window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
     });
-    if(grid.children.length===0) grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
-  }
-});
-</script>
 
-</body>
-</html>
+    grid.appendChild(el);
+  });
+
+  if(grid.children.length===0)
+    grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
+}
+</script>
