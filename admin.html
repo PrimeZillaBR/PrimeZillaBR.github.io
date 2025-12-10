@@ -25,19 +25,17 @@
 
     <div id="loginCard">
       <h3 class="muted">Login</h3>
-      <p class="small">Use as credenciais do admin</p>
-
-      <label>Email (usuário)</label>
+      <p class="small">Use a conta de admin (Firebase Auth)</p>
+      <label>Email</label>
       <input id="loginUser" placeholder="email">
       <label>Senha</label>
       <input id="loginPass" type="password" placeholder="senha">
-      <label>GitHub Personal Access Token (cole aqui)</label>
-      <input id="githubToken" placeholder="token com permissão repo (ex: ghp_...)">
+      <label style="margin-top:8px">Cloudinary unsigned upload preset</label>
+      <input id="cloudinaryPreset" placeholder="ex: produtos_preset (já configurado)">
       <div style="margin-top:10px;display:flex;gap:8px">
         <button id="btnLogin" class="botao">Entrar</button>
-        <button id="btnLogout" class="botao" style="display:none;background:#444">Sair</button>
       </div>
-      <p class="small" style="margin-top:8px">OBS: o token é usado **somente** para salvar/atualizar <code>produtos.json</code> no seu repositório. Ele não é enviado para nenhum servidor externo.</p>
+      <p class="small" style="margin-top:8px">OBS: este painel grava direto no Firestore. A imagem será enviada ao Cloudinary.</p>
     </div>
 
     <div id="panel" style="margin-top:14px;display:none">
@@ -50,7 +48,6 @@
       </div>
 
       <hr style="margin:12px 0">
-
       <h3 class="muted">Adicionar produto</h3>
       <form id="addForm">
         <label>Nome</label>
@@ -61,7 +58,7 @@
         <select id="p_cat"><option value="pods">Pods</option><option value="acessorios">Acessórios</option><option value="eletronicos">Eletrônicos</option><option value="outros">Outros</option></select>
         <label style="margin-top:8px">Tipo</label>
         <select id="p_type"><option value="pod">Pod (usar sabores)</option><option value="non-pod">Não-pod (usar cores)</option></select>
-        <label style="margin-top:8px">Opções (separadas por vírgula) — sabores ou cores</label>
+        <label style="margin-top:8px">Opções (separadas por vírgula)</label>
         <input id="p_opts" placeholder="Ex: Peach Mango, Menthol, Watermelon">
         <label style="margin-top:8px">Imagem</label>
         <input id="p_image" type="file" accept="image/*">
@@ -70,126 +67,98 @@
       </form>
 
       <hr style="margin:12px 0">
-
       <h3 class="muted">Produtos cadastrados</h3>
       <div id="list"></div>
     </div>
   </div>
 
-<script>
-/*
-  Admin sem Firebase:
-  - Login local (credenciais definidas abaixo)
-  - Faz upload para Cloudinary (unsigned preset)
-  - Atualiza produtos.json no GitHub via API (token necessário)
+<script type="module">
+/* Admin com Firebase + Cloudinary
+ - Login via Firebase Auth (email/senha)
+ - Upload imagem para Cloudinary (unsigned preset)
+ - Salva produto no Firestore (coleção "products") com createdAt
 */
 
-const ADMIN_USER = 'admin@primezilla.com';
-const ADMIN_PASS = 'PrimeZilla@2025';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Cloudinary config (user provided)
-const CLOUD_NAME = 'duwsueept';
-const UPLOAD_PRESET = 'produtos_preset';
-const CLOUDINARY_API = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
+/* ---------- CONFIG FIREBASE (já existente no seu projeto) ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+  authDomain: "primezilla-70b94.firebaseapp.com",
+  projectId: "primezilla-70b94",
+  storageBucket: "primezilla-70b94.firebasestorage.app",
+  appId: "1:910803172382:web:db82186d77b8281f13020f"
+};
 
-// GitHub repo config
-const GITHUB_OWNER = 'PrimeZillaBR';
-const GITHUB_REPO = 'PrimeZillaBR.github.io';
-const PRODUTOS_PATH = 'produtos.json';
-const GITHUB_API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${PRODUTOS_PATH}`;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-let GH_TOKEN = ''; // será preenchido no login
-let currentUser = null;
-
+const CLOUD_NAME = 'duwsueept'; // seu Cloudinary
 const el = id => document.getElementById(id);
-const show = (sel) => document.querySelector(sel).style.display = '';
-const hide = (sel) => document.querySelector(sel).style.display = 'none';
 
-// login
-el('btnLogin').addEventListener('click', ()=>{
-  const u = el('loginUser').value.trim();
-  const p = el('loginPass').value;
-  const token = el('githubToken').value.trim();
-  if(!u || !p) return alert('Preencha usuário e senha');
-  if(u === ADMIN_USER && p === ADMIN_PASS){
-    GH_TOKEN = token;
-    currentUser = u;
-    el('who').textContent = u;
-    el('loginCard').style.display = 'none';
-    el('panel').style.display = '';
-    el('btnLogout').style.display = '';
-    loadList();
-  } else {
-    alert('Usuário ou senha incorretos');
+let UPLOAD_PRESET = ''; // vai vir do campo
+
+/* ----- login/logout ----- */
+el('btnLogin').addEventListener('click', async ()=>{
+  const email = el('loginUser').value.trim();
+  const pass = el('loginPass').value;
+  UPLOAD_PRESET = el('cloudinaryPreset').value.trim();
+  if(!email || !pass) return alert('Preencha email e senha');
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged cuidará do resto
+  }catch(err){
+    alert('Erro de login: ' + err.message);
+    console.error(err);
   }
 });
-el('btnLogout').addEventListener('click', ()=> location.reload());
-el('logoutBtn').addEventListener('click', ()=> location.reload());
 
-// upload image to Cloudinary (unsigned preset)
+el('logoutBtn').addEventListener('click', async ()=>{
+  await signOut(auth);
+  location.reload();
+});
+
+/* autenticação - mostra painel quando logado */
+onAuthStateChanged(auth, user=>{
+  if(user){
+    el('loginCard').style.display = 'none';
+    el('panel').style.display = '';
+    el('who').textContent = user.email + ' (' + user.uid + ')';
+    loadList();
+  }else{
+    el('loginCard').style.display = '';
+    el('panel').style.display = 'none';
+  }
+});
+
+/* ---------- Cloudinary upload (unsigned preset) ---------- */
 async function uploadToCloudinary(file){
   if(!file) return '';
+  if(!UPLOAD_PRESET) throw new Error('Preencha o preset do Cloudinary no campo acima');
+  const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
-  // we can request transformations cloudinary side later
-  const res = await fetch(CLOUDINARY_API, { method:'POST', body: fd });
-  if(!res.ok) throw new Error('Erro upload Cloudinary: ' + res.status);
-  const data = await res.json();
-  // return secure_url (already hosted)
-  return data.secure_url;
-}
-
-// helper: get current produtos.json from GitHub (returns {sha, contentArray})
-async function fetchProdutosFromGitHub(){
-  const headers = { Accept: 'application/vnd.github.v3+json' };
-  if(GH_TOKEN) headers.Authorization = 'token ' + GH_TOKEN;
-  const res = await fetch(GITHUB_API_BASE, { headers });
-  if(res.status === 404) return { sha: null, list: [] };
-  if(!res.ok) throw new Error('Erro ao buscar produtos.json: ' + res.status);
+  const res = await fetch(url, { method: 'POST', body: fd });
+  if(!res.ok) throw new Error('Falha upload Cloudinary: ' + res.status);
   const j = await res.json();
-  const sha = j.sha;
-  const content = atob(j.content.replace(/\n/g,'')); // base64 -> string
-  let list = [];
-  try { list = JSON.parse(content); } catch(e){ list = []; }
-  return { sha, list };
+  // adicionar transformação (opcional) - já vem secure_url
+  return j.secure_url;
 }
 
-// helper: save produtos.json on GitHub (create or update)
-async function saveProdutosToGitHub(list, sha){
-  if(!GH_TOKEN) throw new Error('Token do GitHub não informado. Cole-o no campo de login.');
-  const body = {
-    message: 'Atualização produtos via Admin',
-    content: btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2)))),
-    committer: { name: 'PrimeZilla Admin', email: 'admin@primezilla.com' }
-  };
-  if(sha) body.sha = sha;
-  const res = await fetch(GITHUB_API_BASE, {
-    method: 'PUT',
-    headers: {
-      Authorization: 'token ' + GH_TOKEN,
-      Accept: 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if(!res.ok){
-    const txt = await res.text();
-    throw new Error('Erro ao salvar produtos.json: ' + res.status + ' — ' + txt);
-  }
-  return await res.json();
-}
-
-// render list
+/* ---------- Firestore helpers ---------- */
 async function loadList(){
-  try {
-    el('list').innerHTML = 'Carregando...';
-    const { sha, list } = await fetchProdutosFromGitHub();
-    window.__produtos_sha = sha;
-    window.__produtos_list = list;
-    renderList(list);
-  } catch(err){
-    el('list').innerHTML = '<p class="small">Erro ao carregar produtos: ' + err.message + '</p>';
+  el('list').innerHTML = 'Carregando...';
+  try{
+    const snapshot = await getDocs(collection(db,'products'));
+    const arr = [];
+    snapshot.forEach(d => arr.push({ id: d.id, ...d.data() }));
+    renderList(arr);
+  }catch(err){
+    el('list').innerHTML = '<p class="small">Erro: '+err.message+'</p>';
     console.error(err);
   }
 }
@@ -198,25 +167,25 @@ function renderList(list){
   const wrap = el('list');
   wrap.innerHTML = '';
   if(!list.length){ wrap.innerHTML = '<p class="small">Nenhum produto publicado.</p>'; return; }
-  list.forEach((p, idx) => {
+  list.forEach((p, idx)=>{
     const div = document.createElement('div'); div.className='prod-row';
     const img = document.createElement('img'); img.src = p.imageUrl || 'placeholder.png';
-    const info = document.createElement('div'); info.innerHTML = `<strong>${p.name}</strong><br><span class="small">${p.category} • ${p.type} • ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}</span>`;
+    const info = document.createElement('div');
+    info.innerHTML = `<strong>${p.name}</strong><br><span class="small">${p.category} • ${p.type} • ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}</span>`;
     const right = document.createElement('div'); right.className='right';
-    const del = document.createElement('button'); del.className='danger'; del.textContent='Excluir'; del.addEventListener('click', ()=> removeProduct(idx));
+    const del = document.createElement('button'); del.className='danger'; del.textContent='Excluir';
+    del.addEventListener('click', ()=> removeProduct(p.id));
     right.appendChild(del);
     div.appendChild(img); div.appendChild(info); div.appendChild(right);
     wrap.appendChild(div);
   });
 }
 
-// remove product
-async function removeProduct(index){
+/* excluir doc no Firestore */
+async function removeProduct(docId){
   if(!confirm('Excluir produto?')) return;
   try{
-    const { sha, list } = await fetchProdutosFromGitHub();
-    list.splice(index,1);
-    await saveProdutosToGitHub(list, sha);
+    await deleteDoc(doc(db, 'products', docId));
     alert('Produto excluído');
     loadList();
   }catch(err){
@@ -225,41 +194,38 @@ async function removeProduct(index){
   }
 }
 
-// publish product - handler
+/* publicar produto */
 el('publishBtn').addEventListener('click', async (e)=>{
   e.preventDefault();
   try{
     const name = el('p_name').value.trim(); if(!name) return alert('Preencha nome');
-    const price = parseFloat(el('p_price').value) || null;
+    const price = el('p_price').value ? parseFloat(el('p_price').value) : null;
     const category = el('p_cat').value;
     const type = el('p_type').value;
     const options = el('p_opts').value.trim() ? el('p_opts').value.split(',').map(s=>s.trim()) : [];
     const file = el('p_image').files[0];
     const active = el('p_active').checked;
 
-    el('publishBtn').disabled = true;
-    el('publishBtn').textContent = 'Publicando...';
+    el('publishBtn').disabled = true; el('publishBtn').textContent = 'Publicando...';
 
-    // upload imagem
     let imageUrl = '';
-    if(file){
-      imageUrl = await uploadToCloudinary(file);
-      // optional: transform url to square crop (Cloudinary transformation)
-      // we'll request a centered crop using cloudinary params
-      // if secure_url like .../upload/vxxxxx/filename.jpg
-      // we can insert /c_fill,g_auto,w_800,h_800/ after /upload/
-      imageUrl = imageUrl.replace('/upload/','/upload/c_fill,g_auto,w_800,h_800/');
-    }
+    if(file) imageUrl = await uploadToCloudinary(file);
 
-    // build product
+    // normalize fields
     const product = {
-      name, price, currency: 'R$', category, type, options, imageUrl, active
+      name,
+      price: price === null ? null : Number(price),
+      currency: 'R$',
+      category,
+      type,
+      options,
+      imageUrl,
+      active: !!active,
+      createdAt: serverTimestamp()
     };
 
-    // fetch existing list and append
-    const { sha, list } = await fetchProdutosFromGitHub();
-    list.unshift(product); // colocar no topo
-    await saveProdutosToGitHub(list, sha);
+    await addDoc(collection(db,'products'), product);
+
     alert('Produto publicado com sucesso');
     el('addForm').reset();
     loadList();
@@ -272,7 +238,6 @@ el('publishBtn').addEventListener('click', async (e)=>{
   }
 });
 
-// refresh
 el('refreshList').addEventListener('click', loadList);
 
 </script>
