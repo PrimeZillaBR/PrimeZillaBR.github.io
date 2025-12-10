@@ -10,7 +10,15 @@
 body{margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#061524);color:var(--text)}
 .topo{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.2)}
 .logo{height:68px}
-.nav a{margin:0 12px;color:var(--neon);text-decoration:none;font-weight:700}
+
+/* AQUI ESTÁ O CORRETO! 🎯 */
+nav a{
+  margin:0 12px;
+  color:var(--neon);
+  text-decoration:none;
+  font-weight:700;
+}
+
 .hero{padding:40px 20px;text-align:center}
 .hero.neon{background:linear-gradient(180deg,rgba(0,0,0,0.2),transparent);border-bottom:1px solid rgba(0,255,255,0.02)}
 .hero-inner h1{font-size:46px;color:var(--neon);text-shadow:0 6px 30px rgba(0,212,255,0.06)}
