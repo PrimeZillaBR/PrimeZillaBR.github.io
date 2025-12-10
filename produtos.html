@@ -18,10 +18,8 @@
     <a href="contato.html">Contato</a>
   </nav>
 </header>
-
 <main class="container">
   <h2>Produtos</h2>
-
   <div class="cats">
     <button class="catBtn" data-cat="all">Todos</button>
     <button class="catBtn" data-cat="pods">Pods</button>
@@ -29,7 +27,6 @@
     <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
     <button class="catBtn" data-cat="outros">Outros</button>
   </div>
-
   <div id="productsGrid" class="grid">Carregando...</div>
 </main>
 
@@ -50,43 +47,46 @@ const firebaseConfig = {
 };
 
 const PHONE = "5567992018672";
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Segurança contra caracteres quebrando HTML
 function esc(s){
-  return String(s||"").replace(/[&<>"']/g,
-    m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+  return String(s||'').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])
   );
 }
 
-const grid = document.getElementById("productsGrid");
-
-const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+const grid = document.getElementById('productsGrid');
+const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
 
 onSnapshot(q, snap => {
   const arr = [];
   snap.forEach(d => arr.push(d.data()));
-  render(arr, "all");
-  document.querySelectorAll(".catBtn").forEach(btn=>{
-    btn.onclick = ()=> render(arr, btn.dataset.cat);
+  render(arr, 'all');
+
+  document.querySelectorAll('.catBtn').forEach(btn=>{
+    btn.onclick = () => render(arr, btn.dataset.cat);
   });
+
 }, err=>{
-  grid.innerHTML = "<p>Erro ao carregar produtos.</p>";
+  grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
   console.error(err);
 });
 
 function render(list, filter){
-  grid.innerHTML = "";
+  grid.innerHTML = '';
   list.forEach(p=>{
     if(!p.active) return;
-    if(filter !== "all" && p.category !== filter) return;
+    if(filter !== 'all' && p.category !== filter) return;
 
-    const img = p.imageUrl || p.image || "placeholder.png";
-    const priceText = p.price ? `${p.currency||"R$"} ${Number(p.price).toFixed(2)}` : "Consultar valores";
+    const img = p.imageUrl || p.image || 'placeholder.png';
+    const priceText = p.price
+      ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}`
+      : 'Consultar valores';
 
-    const el = document.createElement("div");
-    el.className = "card";
+    const el = document.createElement('div');
+    el.className = 'card';
     el.innerHTML = `
       <img src="${esc(img)}" alt="${esc(p.name)}">
       <h3>${esc(p.name)}</h3>
@@ -94,16 +94,19 @@ function render(list, filter){
       <a class="botao buy">Comprar</a>
     `;
 
-    el.querySelector(".buy").addEventListener("click", ()=>{
-      const label = (p.type === "pod") ? "Sabor" : "Cor";
-      const option = (p.options && p.options[0]) ? p.options[0] : "-";
+    el.querySelector('.buy').addEventListener('click',()=>{
+
+      const variantLabel = (p.type === 'pod') ? 'Sabor' : 'Cor';
+      const variant = (p.options && p.options[0]) ? p.options[0] : '-';
+
       const text = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}
+`Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
-${label}: ${option}
+${variantLabel}: ${variant}
 Valor: ${priceText}
 Forma de Pagamento: PIX`
       );
+
       window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
     });
 
@@ -111,7 +114,7 @@ Forma de Pagamento: PIX`
   });
 
   if(grid.children.length === 0){
-    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
+    grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
   }
 }
 </script>
