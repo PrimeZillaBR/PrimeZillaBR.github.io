@@ -6,7 +6,6 @@
   <title>Admin — PrimeZilla</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ajustes rapidos para admin (mantive sua paleta) */
     .small{color:#9fb6c3;font-size:13px}
     .wrap{max-width:980px;margin:18px auto;padding:12px}
     #loginCard, #panel{background:linear-gradient(180deg,#071226,#041827);padding:18px;border-radius:12px;border:1px solid rgba(0,212,255,0.06)}
@@ -22,7 +21,6 @@
 <body>
   <div class="wrap">
     <h2 class="muted">Painel Admin — PrimeZilla</h2>
-
     <div id="loginCard">
       <h3 class="muted">Login</h3>
       <p class="small">Use a conta de admin (Firebase Auth)</p>
@@ -55,15 +53,30 @@
         <label style="margin-top:8px">Preço (apenas números)</label>
         <input id="p_price" placeholder="39.90">
         <label style="margin-top:8px">Categoria</label>
-        <select id="p_cat"><option value="pods">Pods</option><option value="acessorios">Acessórios</option><option value="eletronicos">Eletrônicos</option><option value="outros">Outros</option></select>
+        <select id="p_cat">
+          <option value="pods">Pods</option>
+          <option value="acessorios">Acessórios</option>
+          <option value="eletronicos">Eletrônicos</option>
+          <option value="outros">Outros</option>
+        </select>
+
         <label style="margin-top:8px">Tipo</label>
-        <select id="p_type"><option value="pod">Pod (usar sabores)</option><option value="non-pod">Não-pod (usar cores)</option></select>
+        <select id="p_type">
+          <option value="pod">Pod (usar sabores)</option>
+          <option value="non-pod">Não-pod (usar cores)</option>
+        </select>
+
         <label style="margin-top:8px">Opções (separadas por vírgula)</label>
         <input id="p_opts" placeholder="Ex: Peach Mango, Menthol, Watermelon">
+
         <label style="margin-top:8px">Imagem</label>
         <input id="p_image" type="file" accept="image/*">
+
         <label style="margin-top:8px"><input id="p_active" type="checkbox" checked> Ativo</label>
-        <div style="margin-top:10px"><button class="botao" id="publishBtn">Publicar produto</button></div>
+
+        <div style="margin-top:10px">
+          <button class="botao" id="publishBtn">Publicar produto</button>
+        </div>
       </form>
 
       <hr style="margin:12px 0">
@@ -73,17 +86,11 @@
   </div>
 
 <script type="module">
-/* Admin com Firebase + Cloudinary
- - Login via Firebase Auth (email/senha)
- - Upload imagem para Cloudinary (unsigned preset)
- - Salva produto no Firestore (coleção "products") com createdAt
-*/
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* ---------- CONFIG FIREBASE (já existente no seu projeto) ---------- */
+/* CONFIG FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
   authDomain: "primezilla-70b94.firebaseapp.com",
@@ -91,147 +98,145 @@ const firebaseConfig = {
   storageBucket: "primezilla-70b94.firebasestorage.app",
   appId: "1:910803172382:web:db82186d77b8281f13020f"
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const CLOUD_NAME = 'duwsueept'; // seu Cloudinary
+const CLOUD_NAME = 'duwsueept';
+let UPLOAD_PRESET = '';
+
 const el = id => document.getElementById(id);
 
-let UPLOAD_PRESET = ''; // vai vir do campo
-
-/* ----- login/logout ----- */
+/* LOGIN */
 el('btnLogin').addEventListener('click', async ()=>{
   const email = el('loginUser').value.trim();
   const pass = el('loginPass').value;
   UPLOAD_PRESET = el('cloudinaryPreset').value.trim();
+
   if(!email || !pass) return alert('Preencha email e senha');
   try{
     await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged cuidará do resto
   }catch(err){
     alert('Erro de login: ' + err.message);
-    console.error(err);
   }
 });
 
+/* LOGOUT */
 el('logoutBtn').addEventListener('click', async ()=>{
   await signOut(auth);
   location.reload();
 });
 
-/* autenticação - mostra painel quando logado */
+/* STATUS LOGIN */
 onAuthStateChanged(auth, user=>{
   if(user){
     el('loginCard').style.display = 'none';
     el('panel').style.display = '';
-    el('who').textContent = user.email + ' (' + user.uid + ')';
+    el('who').textContent = user.email;
     loadList();
-  }else{
+  } else {
     el('loginCard').style.display = '';
     el('panel').style.display = 'none';
   }
 });
 
-/* ---------- Cloudinary upload (unsigned preset) ---------- */
+/* UPLOAD CLOUDINARY */
 async function uploadToCloudinary(file){
   if(!file) return '';
   if(!UPLOAD_PRESET) throw new Error('Preencha o preset do Cloudinary no campo acima');
+
   const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
+
   const res = await fetch(url, { method: 'POST', body: fd });
-  if(!res.ok) throw new Error('Falha upload Cloudinary: ' + res.status);
+  if(!res.ok) throw new Error('Falha upload Cloudinary');
+
   const j = await res.json();
-  // adicionar transformação (opcional) - já vem secure_url
   return j.secure_url;
 }
 
-/* ---------- Firestore helpers ---------- */
+/* LISTAR */
 async function loadList(){
-  el('list').innerHTML = 'Carregando...';
-  try{
-    const snapshot = await getDocs(collection(db,'products'));
-    const arr = [];
-    snapshot.forEach(d => arr.push({ id: d.id, ...d.data() }));
-    renderList(arr);
-  }catch(err){
-    el('list').innerHTML = '<p class="small">Erro: '+err.message+'</p>';
-    console.error(err);
-  }
-}
+  const list = el('list');
+  list.innerHTML = 'Carregando...';
 
-function renderList(list){
-  const wrap = el('list');
-  wrap.innerHTML = '';
-  if(!list.length){ wrap.innerHTML = '<p class="small">Nenhum produto publicado.</p>'; return; }
-  list.forEach((p, idx)=>{
-    const div = document.createElement('div'); div.className='prod-row';
-    const img = document.createElement('img'); img.src = p.imageUrl || 'placeholder.png';
-    const info = document.createElement('div');
-    info.innerHTML = `<strong>${p.name}</strong><br><span class="small">${p.category} • ${p.type} • ${p.price?('R$ '+Number(p.price).toFixed(2)):'Consultar'}</span>`;
-    const right = document.createElement('div'); right.className='right';
-    const del = document.createElement('button'); del.className='danger'; del.textContent='Excluir';
-    del.addEventListener('click', ()=> removeProduct(p.id));
-    right.appendChild(del);
-    div.appendChild(img); div.appendChild(info); div.appendChild(right);
-    wrap.appendChild(div);
+  const snap = await getDocs(collection(db,'products'));
+  const arr = [];
+  snap.forEach(d => arr.push({id:d.id, ...d.data()}));
+
+  list.innerHTML = '';
+  if(!arr.length){
+    list.innerHTML = '<p class="small">Nenhum produto publicado.</p>';
+    return;
+  }
+
+  arr.forEach(p=>{
+    const row = document.createElement('div');
+    row.className='prod-row';
+
+    row.innerHTML = `
+      <img src="${p.imageUrl}">
+      <div>
+        <strong>${p.name}</strong><br>
+        <span class="small">${p.category} • ${p.type}</span>
+      </div>
+      <div class="right">
+        <button class="danger" onclick="window.deleteProd('${p.id}')">Excluir</button>
+      </div>
+    `;
+
+    list.appendChild(row);
   });
 }
 
-/* excluir doc no Firestore */
-async function removeProduct(docId){
+/* EXCLUIR */
+window.deleteProd = async (id)=>{
   if(!confirm('Excluir produto?')) return;
-  try{
-    await deleteDoc(doc(db, 'products', docId));
-    alert('Produto excluído');
-    loadList();
-  }catch(err){
-    alert('Falha ao excluir: ' + err.message);
-    console.error(err);
-  }
+  await deleteDoc(doc(db,'products',id));
+  loadList();
 }
 
-/* publicar produto */
+/* PUBLICAR */
 el('publishBtn').addEventListener('click', async (e)=>{
   e.preventDefault();
+
   try{
-    const name = el('p_name').value.trim(); if(!name) return alert('Preencha nome');
-    const price = el('p_price').value ? parseFloat(el('p_price').value) : null;
+    const name = el('p_name').value.trim();
+    if(!name) return alert('Preencha nome');
+
+    const price = el('p_price').value || null;
     const category = el('p_cat').value;
     const type = el('p_type').value;
-    const options = el('p_opts').value.trim() ? el('p_opts').value.split(',').map(s=>s.trim()) : [];
+    const options = el('p_opts').value.trim()
+      ? el('p_opts').value.split(',').map(v=>v.trim())
+      : [];
     const file = el('p_image').files[0];
     const active = el('p_active').checked;
 
-    el('publishBtn').disabled = true; el('publishBtn').textContent = 'Publicando...';
+    el('publishBtn').disabled = true;
+    el('publishBtn').textContent = 'Publicando...';
 
     let imageUrl = '';
     if(file) imageUrl = await uploadToCloudinary(file);
 
-    // normalize fields
-    const product = {
+    await addDoc(collection(db,'products'),{
       name,
-      price: price === null ? null : Number(price),
-      currency: 'R$',
+      price: price?Number(price):null,
       category,
       type,
       options,
       imageUrl,
-      active: !!active,
+      active,
       createdAt: serverTimestamp()
-    };
+    });
 
-    await addDoc(collection(db,'products'), product);
-
-    alert('Produto publicado com sucesso');
+    alert('Produto publicado com sucesso!');
     el('addForm').reset();
     loadList();
   }catch(err){
     alert('Erro ao publicar: ' + err.message);
-    console.error(err);
   }finally{
     el('publishBtn').disabled = false;
     el('publishBtn').textContent = 'Publicar produto';
@@ -239,7 +244,7 @@ el('publishBtn').addEventListener('click', async (e)=>{
 });
 
 el('refreshList').addEventListener('click', loadList);
-
 </script>
+
 </body>
 </html>
