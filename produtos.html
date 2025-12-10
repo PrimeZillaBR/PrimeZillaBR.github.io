@@ -1,116 +1,81 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Produtos — PrimeZilla</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="topo">
-  <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/ersuwnmpqepkaosb85gf" class="logo" alt="PrimeZilla">
-  </div>
-  <nav class="nav">
-    <a href="index.html">Início</a>
-    <a href="produtos.html" class="ativo">Produtos</a>
-    <a href="admin.html">Admin</a>
-    <a href="contato.html">Contato</a>
-  </nav>
-</header>
-
-<main class="container">
-  <h2>Produtos</h2>
-
-  <div class="cats">
-    <button class="catBtn" data-cat="all">Todos</button>
-    <button class="catBtn" data-cat="pods">Pods</button>
-    <button class="catBtn" data-cat="acessorios">Acessórios</button>
-    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
-    <button class="catBtn" data-cat="outros">Outros</button>
-  </div>
-
-  <div id="productsGrid" class="grid">Carregando...</div>
-</main>
-
-<footer class="footer">
-  © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
-</footer>
-
 <script>
-// URL do produtos.json no GitHub
+// URL do JSON que o admin atualiza no GitHub
 const PROD_URL = "https://raw.githubusercontent.com/PrimeZillaBR/PrimeZillaBR.github.io/main/produtos.json";
 const PHONE = "5567992018672";
-const grid = document.getElementById("productsGrid");
 
-// segurança contra HTML quebrar
-function esc(s){
-  return String(s||"").replace(/[&<>"']/g, m => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]
-  ));
-}
+const grid = document.getElementById('productsGrid');
+let produtos = [];
 
-// Buscar produtos do GitHub
-async function loadProducts(){
-  try{
-    const res = await fetch(PROD_URL + "?v=" + Date.now()); // força atualização
-    if(!res.ok) throw new Error("Falha ao carregar produtos");
-    const list = await res.json();
-    render(list, "all");
-
-    document.querySelectorAll(".catBtn").forEach(btn=>{
-      btn.onclick = ()=> render(list, btn.dataset.cat);
-    });
-
-  }catch(err){
+// Carregar produtos do GitHub JSON
+async function loadProducts() {
+  try {
+    grid.innerHTML = "Carregando...";
+    const res = await fetch(PROD_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Erro ao carregar produtos.json");
+    produtos = await res.json();
+    render("all");
+    bindFilters();
+  } catch (err) {
     console.error(err);
     grid.innerHTML = "<p>Erro ao carregar produtos.</p>";
   }
 }
 
-// Renderizar produtos com filtro
-function render(list, cat){
+// Segurança HTML
+function esc(s) {
+  return String(s || "").replace(/[&<>\"']/g, m =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[m])
+  );
+}
+
+// Botões de categoria
+function bindFilters() {
+  document.querySelectorAll(".catBtn").forEach(btn => {
+    btn.onclick = () => render(btn.dataset.cat);
+  });
+}
+
+// Renderização
+function render(filter) {
   grid.innerHTML = "";
 
-  list.forEach(p=>{
-    if(!p.active) return;
-    if(cat !== "all" && p.category !== cat) return;
+  produtos.forEach(p => {
+    if (!p.active) return;
+    if (filter !== "all" && p.category !== filter) return;
 
-    const img = p.imageUrl || "placeholder.png";
-    const price = p.price ? `R$ ${Number(p.price).toFixed(2)}` : "Consultar valores";
+    const img = p.imageUrl || p.image || "placeholder.png";
+    const priceText = p.price ? `R$ ${Number(p.price).toFixed(2)}` : "Consultar valores";
 
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
       <img src="${esc(img)}" alt="${esc(p.name)}">
       <h3>${esc(p.name)}</h3>
-      <p class="price">${esc(price)}</p>
+      <p class="price">${esc(priceText)}</p>
       <a class="botao buy">Comprar</a>
     `;
 
-    card.querySelector(".buy").addEventListener("click",()=>{
-      const variantLabel = (p.type === "pod") ? "Sabor" : "Cor";
-      const variant = (p.options && p.options[0]) ? p.options[0] : "-";
+    div.querySelector(".buy").onclick = () => {
+      const variantLabel = p.type === "pod" ? "Sabor" : "Cor";
+      const variant = p.options && p.options[0] ? p.options[0] : "-";
       const text = encodeURIComponent(
-`Olá! Tenho interesse no produto: ${p.name}
+        `Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
 ${variantLabel}: ${variant}
-Valor: ${price}
+Valor: ${priceText}
 Forma de Pagamento: PIX`
       );
       window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
-    });
+    };
 
-    grid.appendChild(card);
+    grid.appendChild(div);
   });
 
-  if(!grid.children.length){
+  if (grid.children.length === 0) {
     grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
   }
 }
 
+// iniciar
 loadProducts();
 </script>
-
-</body>
-</html>
