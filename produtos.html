@@ -10,66 +10,73 @@ const firebaseConfig = {
   appId: "1:910803172382:web:db82186d77b8281f13020f"
 };
 
+const PHONE = '5567992018672';
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const PHONE = '5567992018672';
 
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function esc(s){ 
+  return String(s||'').replace(/[&<>"']/g,m=>(
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+  ));
+}
 
-const grid = document.getElementById('productsGrid');
+document.addEventListener('DOMContentLoaded', ()=>{
 
-const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+  const grid = document.getElementById('productsGrid');
+  const q = query(collection(db,'products'), orderBy('createdAt','desc'));
 
-onSnapshot(q, snap => {
-  const arr = [];
-  snap.forEach(d => arr.push({...d.data(), id: d.id}));
-  render(arr,'all');
+  onSnapshot(q, snap => {
+    const arr = [];
+    snap.forEach(d => arr.push(d.data()));
+    render(arr,'all');
 
-  document.querySelectorAll('.catBtn').forEach(b =>
-    b.onclick = ()=> render(arr, b.dataset.cat)
-  );
-}, err=>{
-  grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-  console.error(err);
-});
+    document.querySelectorAll('.catBtn').forEach(btn=>{
+      btn.onclick = ()=> render(arr, btn.dataset.cat);
+    });
 
-function render(list, filter){
-  grid.innerHTML = '';
-  list.forEach(p=>{
-    if(!p.active) return;
-    if(filter!=='all' && p.category !== filter) return;
+  }, err=>{
+    console.error(err);
+    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  });
 
-    const img = p.imageUrl || p.image || 'placeholder.png';
-    const priceText = p.price 
-      ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}`
-      : 'Consultar valores';
+  function render(list, filter){
+    grid.innerHTML = '';
+    list.forEach(p=>{
+      if(!p.active) return;
+      if(filter!=='all' && p.category !== filter) return;
 
-    const el = document.createElement('div');
-    el.className='card';
-    el.innerHTML = `
-      <img src="${esc(img)}" alt="${esc(p.name)}">
-      <h3>${esc(p.name)}</h3>
-      <p class="price">${esc(priceText)}</p>
-      <a class="botao buy">Comprar</a>
-    `;
+      const img = p.imageUrl || p.image || 'placeholder.png';
+      const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
 
-    el.querySelector('.buy').onclick = ()=>{
-      const variantLabel = (p.type==='pod')? 'Sabor' : 'Cor';
-      const variant = (p.options && p.options[0])? p.options[0] : '-';
-      const text = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${esc(img)}" alt="${esc(p.name)}">
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${esc(priceText)}</p>
+        <a class="botao buy">Comprar</a>
+      `;
+
+      card.querySelector('.buy').addEventListener('click', ()=>{
+        const variantLabel = (p.type==='pod')? 'Sabor' : 'Cor';
+        const variant = (p.options && p.options[0])? p.options[0] : '-';
+        const text = encodeURIComponent(
+`Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
 ${variantLabel}: ${variant}
 Valor: ${priceText}
 Forma de Pagamento: PIX`
-      );
-      window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
-    };
+        );
+        window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
+      });
 
-    grid.appendChild(el);
-  });
+      grid.appendChild(card);
+    });
 
-  if(grid.children.length===0)
-    grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
-}
+    if(grid.children.length===0){
+      grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
+    }
+  }
+
+});
 </script>
