@@ -19,10 +19,12 @@ function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 const grid = document.getElementById('productsGrid');
 
 const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+
 onSnapshot(q, snap => {
   const arr = [];
-  snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
+  snap.forEach(d => arr.push({...d.data(), id: d.id}));
   render(arr,'all');
+
   document.querySelectorAll('.catBtn').forEach(b =>
     b.onclick = ()=> render(arr, b.dataset.cat)
   );
@@ -38,7 +40,9 @@ function render(list, filter){
     if(filter!=='all' && p.category !== filter) return;
 
     const img = p.imageUrl || p.image || 'placeholder.png';
-    const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+    const priceText = p.price 
+      ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}`
+      : 'Consultar valores';
 
     const el = document.createElement('div');
     el.className='card';
@@ -49,18 +53,18 @@ function render(list, filter){
       <a class="botao buy">Comprar</a>
     `;
 
-    el.querySelector('.buy').addEventListener('click', ()=>{
+    el.querySelector('.buy').onclick = ()=>{
       const variantLabel = (p.type==='pod')? 'Sabor' : 'Cor';
       const variant = (p.options && p.options[0])? p.options[0] : '-';
       const text = encodeURIComponent(
-`Olá! Tenho interesse no produto: ${p.name}
+        `Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
 ${variantLabel}: ${variant}
 Valor: ${priceText}
 Forma de Pagamento: PIX`
       );
       window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
-    });
+    };
 
     grid.appendChild(el);
   });
