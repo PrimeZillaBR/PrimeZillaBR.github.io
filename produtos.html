@@ -18,8 +18,10 @@
     <a href="contato.html">Contato</a>
   </nav>
 </header>
+
 <main class="container">
   <h2>Produtos</h2>
+
   <div class="cats">
     <button class="catBtn" data-cat="all">Todos</button>
     <button class="catBtn" data-cat="pods">Pods</button>
@@ -27,6 +29,7 @@
     <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
     <button class="catBtn" data-cat="outros">Outros</button>
   </div>
+
   <div id="productsGrid" class="grid">Carregando...</div>
 </main>
 
@@ -34,89 +37,79 @@
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-  authDomain: "primezilla-70b94.firebaseapp.com",
-  projectId: "primezilla-70b94",
-  storageBucket: "primezilla-70b94.firebasestorage.app",
-  appId: "1:910803172382:web:db82186d77b8281f13020f"
-};
-
+<script>
+// URL do produtos.json no GitHub
+const PROD_URL = "https://raw.githubusercontent.com/PrimeZillaBR/PrimeZillaBR.github.io/main/produtos.json";
 const PHONE = "5567992018672";
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const grid = document.getElementById("productsGrid");
 
-// Segurança contra caracteres quebrando HTML
+// segurança contra HTML quebrar
 function esc(s){
-  return String(s||'').replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])
-  );
+  return String(s||"").replace(/[&<>"']/g, m => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]
+  ));
 }
 
-const grid = document.getElementById('productsGrid');
-const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+// Buscar produtos do GitHub
+async function loadProducts(){
+  try{
+    const res = await fetch(PROD_URL + "?v=" + Date.now()); // força atualização
+    if(!res.ok) throw new Error("Falha ao carregar produtos");
+    const list = await res.json();
+    render(list, "all");
 
-onSnapshot(q, snap => {
-  const arr = [];
-  snap.forEach(d => arr.push(d.data()));
-  render(arr, 'all');
+    document.querySelectorAll(".catBtn").forEach(btn=>{
+      btn.onclick = ()=> render(list, btn.dataset.cat);
+    });
 
-  document.querySelectorAll('.catBtn').forEach(btn=>{
-    btn.onclick = () => render(arr, btn.dataset.cat);
-  });
+  }catch(err){
+    console.error(err);
+    grid.innerHTML = "<p>Erro ao carregar produtos.</p>";
+  }
+}
 
-}, err=>{
-  grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-  console.error(err);
-});
+// Renderizar produtos com filtro
+function render(list, cat){
+  grid.innerHTML = "";
 
-function render(list, filter){
-  grid.innerHTML = '';
   list.forEach(p=>{
     if(!p.active) return;
-    if(filter !== 'all' && p.category !== filter) return;
+    if(cat !== "all" && p.category !== cat) return;
 
-    const img = p.imageUrl || p.image || 'placeholder.png';
-    const priceText = p.price
-      ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}`
-      : 'Consultar valores';
+    const img = p.imageUrl || "placeholder.png";
+    const price = p.price ? `R$ ${Number(p.price).toFixed(2)}` : "Consultar valores";
 
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.innerHTML = `
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
       <img src="${esc(img)}" alt="${esc(p.name)}">
       <h3>${esc(p.name)}</h3>
-      <p class="price">${esc(priceText)}</p>
+      <p class="price">${esc(price)}</p>
       <a class="botao buy">Comprar</a>
     `;
 
-    el.querySelector('.buy').addEventListener('click',()=>{
-
-      const variantLabel = (p.type === 'pod') ? 'Sabor' : 'Cor';
-      const variant = (p.options && p.options[0]) ? p.options[0] : '-';
-
+    card.querySelector(".buy").addEventListener("click",()=>{
+      const variantLabel = (p.type === "pod") ? "Sabor" : "Cor";
+      const variant = (p.options && p.options[0]) ? p.options[0] : "-";
       const text = encodeURIComponent(
 `Olá! Tenho interesse no produto: ${p.name}
 Quantidade: 1
 ${variantLabel}: ${variant}
-Valor: ${priceText}
+Valor: ${price}
 Forma de Pagamento: PIX`
       );
-
       window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
     });
 
-    grid.appendChild(el);
+    grid.appendChild(card);
   });
 
-  if(grid.children.length === 0){
-    grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
+  if(!grid.children.length){
+    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
   }
 }
+
+loadProducts();
 </script>
 
 </body>
