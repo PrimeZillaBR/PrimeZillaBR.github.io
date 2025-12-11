@@ -1,215 +1,224 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Produtos — PrimeZilla</title>
-<link rel="stylesheet" href="style.css">
-<style>
-/* === estilo escuro igual a aba Produtos que você aprovou === */
-body{background:#0a0f14;color:#e6f7ff;font-family:Inter,system-ui,Arial;padding:0;margin:0}
-.topo{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:transparent}
-.logo{height:42px}
-.container{max-width:1100px;margin:18px auto;padding:18px}
-h2{margin:0 0 14px 0;color:#e6f7ff}
-.cats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-.catBtn{background:#0f1720;border:1px solid #1f2a33;color:#cfeffa;padding:8px 14px;border-radius:8px;cursor:pointer}
-.catBtn:hover,.catBtn.ativo-cat{background:#00d4ff;color:#001826;border-color:#00d4ff}
-.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.card{background:#071226;border-radius:12px;padding:14px;color:#e6f7ff;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(0,212,255,0.04);transition:transform .12s}
-.card:hover{transform:translateY(-6px)}
-.card .media img{width:100%;height:220px;object-fit:cover;border-radius:10px}
-.info h3{margin:0;font-size:18px}
-.price{font-weight:700;color:#00d4ff}
-.controls{display:grid;gap:8px}
-label{font-size:13px;color:#9fb6c3}
-select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071826;color:#e6f7ff}
-.botao{background:linear-gradient(90deg,#00d4ff,#007ac1);color:#001826;padding:10px;border-radius:8px;border:none;cursor:pointer}
-.msg{padding:12px;border-radius:8px;background:#071226;border:1px solid rgba(255,255,255,0.02);color:#cfeffa;margin-bottom:12px}
-.small{font-size:13px;color:#9fb6c3}
-.footer{padding:18px;text-align:center;color:#9fb6c3;margin-top:26px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PrimeZilla — Eletrônicos & Variedades</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ======== ESTILO IDÊNTICO À ABA PRODUTOS ======== */
+
+    body {
+      background: #07131c;
+      color: #e6f7ff;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .topo {
+      background: #0b2230;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #0f2d40;
+    }
+
+    .logo { height: 60px; }
+
+    .nav a {
+      color: #c9ecff;
+      margin-left: 12px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nav a:hover {
+      color: #00d4ff;
+    }
+
+    /* HERO escura combinando com o resto */
+    .hero {
+      background: linear-gradient(90deg, #002637, #00384f);
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 2px solid #0f2d40;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 42px;
+      color: #00d4ff;
+    }
+
+    .hero p {
+      color: #c9ecff;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    h2 { color: #00d4ff; }
+
+    /* GRID igual produtos */
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    /* CARD igualzinho a aba produtos */
+    .card {
+      background: #0b2230;
+      border-radius: 8px;
+      padding: 10px;
+      color: #e6f7ff;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      border: 1px solid #0f2d40;
+    }
+
+    .card .media img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .price {
+      font-weight: 700;
+      margin: 6px 0;
+    }
+
+    /* Botão igual produtos */
+    .btnBuy {
+      background: linear-gradient(90deg, #00d4ff, #007ac1);
+      color: #001826;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btnBuy:hover {
+      opacity: 0.9;
+    }
+
+    .footer {
+      background: #0b2230;
+      padding: 20px;
+      text-align: center;
+      border-top: 2px solid #0f2d40;
+      color: #6bc8ff;
+      margin-top: 30px;
+    }
+  </style>
 </head>
 <body>
+
 <header class="topo">
-  <div class="brand"><img class="logo" src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" alt="PrimeZilla"></div>
-  <nav class="nav"><a href="index.html" style="color:#9fb6c3;margin-right:14px">Início</a><a href="produtos.html" style="color:#00d4ff">Produtos</a></nav>
+  <div class="brand">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="ativo">Início</a>
+    <a href="produtos.html">Produtos</a>
+    <a href="admin.html">Admin</a>
+    <a href="contato.html">Contato</a>
+  </nav>
 </header>
 
-<main class="container">
-  <h2>Produtos</h2>
-
-  <div id="status" class="msg small">Carregando fontes de produto...</div>
-
-  <div class="cats">
-    <button class="catBtn ativo-cat" data-cat="all">Todos</button>
-    <button class="catBtn" data-cat="pods">Pods</button>
-    <button class="catBtn" data-cat="acessorios">Acessórios</button>
-    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
-    <button class="catBtn" data-cat="outros">Outros</button>
+<section class="hero">
+  <div class="hero-inner">
+    <h1>PrimeZilla</h1>
+    <p>Eletrônicos & Variedades — entrega rápida em Jardim e Guia Lopes</p>
   </div>
+</section>
 
-  <div id="productsGrid" class="grid">Carregando...</div>
+<main class="container">
+  <section class="catalog">
+    <h2>Destaques</h2>
+    <div id="productsGrid" class="grid">Carregando produtos...</div>
+  </section>
 </main>
 
-<footer class="footer">© 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_</footer>
+<footer class="footer">
+  © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
+</footer>
 
-<script>
-/*
-  Estratégia:
-  1) Tenta fetch('produtos.json')
-  2) Se OK e resultar em array → usa esse array
-  3) Se fetch falhar / não for array → carrega do Firestore (fallback)
-  4) Mostra mensagens no elemento #status e console para debug
-*/
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const PHONE = "5567992018672";
-const statusEl = document.getElementById('status');
-const grid = document.getElementById('productsGrid');
-const catButtons = Array.from(document.querySelectorAll('.catBtn'));
-let produtos = [];
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+    authDomain: "primezilla-70b94.firebaseapp.com",
+    projectId: "primezilla-70b94",
+    storageBucket: "primezilla-70b94.firebasestorage.app",
+    appId: "1:910803172382:web:db82186d77b8281f13020f"
+  };
 
-// escape HTML
-function esc(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  const PHONE = '5567992018672';
 
-async function tryLoadFromJSON(){
-  statusEl.textContent = 'Tentando carregar produtos.json...';
-  try{
-    const res = await fetch('produtos.json?'+Date.now(), { cache: 'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    // cases: array OR object with { list: [...] } OR object with root array under some key
-    if(Array.isArray(data)){
-      console.log('produtos.json carregado (array).', data.length, 'itens.');
-      statusEl.textContent = 'Produtos carregados do produtos.json';
-      return data;
-    }
-    // maybe the file contains { list: [...] } or { produtos: [...] }
-    const arrKeys = Object.keys(data).filter(k => Array.isArray(data[k]));
-    if(arrKeys.length){
-      console.log('produtos.json carregado (array em propriedade):', arrKeys[0]);
-      statusEl.textContent = `produtos.json: usando array em "${arrKeys[0]}"`;
-      return data[arrKeys[0]];
-    }
-    // fallback: if object but not array
-    throw new Error('produtos.json não contém um array');
-  }catch(err){
-    console.warn('Falha ao carregar produtos.json:', err);
-    statusEl.textContent = 'produtos.json não disponível ou inválido — tentando Firestore...';
-    return null;
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  function esc(s) {
+    return String(s||'').replace(/[&<>"']/g,m=>(
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+    ));
   }
-}
 
-async function tryLoadFromFirestore(){
-  statusEl.textContent = 'Carregando produtos do Firestore (fallback)...';
-  try{
-    // carrega dinamicamente SDK apenas quando necessário
-    const mod = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js");
-    const fb = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js");
-    const { initializeApp } = mod;
-    const { getFirestore, collection, query, orderBy, getDocs } = fb;
-    const firebaseConfig = {
-      apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-      authDomain: "primezilla-70b94.firebaseapp.com",
-      projectId: "primezilla-70b94",
-      storageBucket: "primezilla-70b94.firebasestorage.app",
-      appId: "1:910803172382:web:db82186d77b8281f13020f"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const q = query(collection(db, 'products'), orderBy('createdAt','desc'));
-    const snap = await getDocs(q);
-    const list = [];
-    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-    console.log('Firestore carregado,', list.length, 'docs.');
-    statusEl.textContent = 'Produtos carregados do Firestore';
-    return list;
-  }catch(err){
-    console.error('Falha ao carregar Firestore:', err);
-    statusEl.textContent = 'Erro ao carregar Firestore (ver console).';
-    return null;
-  }
-}
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const grid = document.getElementById('productsGrid');
+    const q = query(collection(db,'products'), orderBy('createdAt','desc'));
 
-function render(filter='all'){
-  grid.innerHTML = '';
-  const list = produtos || [];
-  list.forEach(p => {
-    // mostrar se active !== false
-    if(p.active === false) return;
-    if(filter !== 'all' && String(p.category||'').toLowerCase() !== filter) return;
+    onSnapshot(q, snap => {
+      grid.innerHTML = '';
 
-    const img = p.imageUrl || p.image || 'placeholder.png';
-    const priceText = (p.price !== null && p.price !== undefined)
-      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
-      : 'Consultar valores';
+      snap.forEach(doc => {
+        const p = doc.data();
+        if(!p.active) return;
 
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.innerHTML = `
-      <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
-      <div class="info">
-        <h3>${esc(p.name)}</h3>
-        <p class="price">${esc(priceText)}</p>
-        <div class="controls">
-          <label>Qtd
-            <select class="qty"><option>1</option><option>2</option><option>3</option></select>
-          </label>
-          <label>${(p.type === 'pod') ? 'Sabor' : 'Cor'}
-            <select class="variant">${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}</select>
-          </label>
-          <label>Pagamento
-            <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
-          </label>
-          <button class="botao btnBuy">Comprar (WhatsApp)</button>
-        </div>
-      </div>
-    `;
-    el.querySelector('.btnBuy').addEventListener('click', ()=>{
-      const qtd = el.querySelector('.qty').value;
-      const variant = el.querySelector('.variant').value || '-';
-      const pay = el.querySelector('.pay').value;
-      const variantLabel = (p.type === 'pod') ? 'Sabor' : 'Cor';
-      const valorText = (p.price !== null && p.price !== undefined) ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-      const text = encodeURIComponent(`Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`);
-      window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
+        const img = p.imageUrl || p.image || 'placeholder.png';
+        const priceText = p.price
+          ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}`
+          : 'Consultar valores';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+          <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
+          <div class="info">
+            <h3>${esc(p.name)}</h3>
+            <p class="price">${esc(priceText)}</p>
+            <button class="btnBuy">Comprar (WhatsApp)</button>
+          </div>
+        `;
+
+        card.querySelector('.btnBuy').addEventListener('click', ()=>{
+          const text = encodeURIComponent(
+            `Olá! Tenho interesse no produto: ${p.name}\nValor: ${priceText}`
+          );
+          window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
+        });
+
+        grid.appendChild(card);
+      });
+
+      if(grid.innerHTML === '') {
+        grid.innerHTML = '<p>Nenhum produto disponível.</p>';
+      }
     });
-
-    grid.appendChild(el);
   });
-  if(!grid.children.length) grid.innerHTML = '<p class="small">Nenhum item nesta categoria.</p>';
-}
-
-// eventos dos botões
-catButtons.forEach(btn => {
-  btn.addEventListener('click', ()=>{
-    catButtons.forEach(b=>b.classList.remove('ativo-cat'));
-    btn.classList.add('ativo-cat');
-    render(btn.dataset.cat);
-  });
-});
-
-(async function init(){
-  // 1) tenta JSON
-  const fromJson = await tryLoadFromJSON();
-  if(Array.isArray(fromJson) && fromJson.length){
-    produtos = fromJson;
-    render('all');
-    return;
-  }
-
-  // 2) fallback Firestore
-  const fromFs = await tryLoadFromFirestore();
-  if(Array.isArray(fromFs) && fromFs.length){
-    produtos = fromFs;
-    render('all');
-    return;
-  }
-
-  // 3) nada funcionou
-  statusEl.textContent = 'Nenhuma fonte disponível: ver console (Network/Console).';
-  grid.innerHTML = '<p class="small">Não foi possível carregar produtos. Verifique produtos.json ou Firestore.</p>';
-})();
 </script>
+
 </body>
 </html>
