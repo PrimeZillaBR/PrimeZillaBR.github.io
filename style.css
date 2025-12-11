@@ -18,12 +18,17 @@
 html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 
 .topo{
+  position: sticky;   /* ← fixa o cabeçalho */
+  top: 0;             /* ← fixa no topo da tela */
+  z-index: 999;       /* ← fica acima dos itens */
+  backdrop-filter: blur(6px); /* efeito bonito de vidro */
+
   display:flex;
   align-items:center;
   justify-content:space-between;
   padding:12px 20px;
-  background:transparent;
-  border-bottom:1px solid rgba(255,255,255,0.02);
+  background:rgba(0,0,0,0.35); /* leve transparência */
+  border-bottom:1px solid rgba(255,255,255,0.05);
 }
 .logo{height:44px}
 
