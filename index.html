@@ -6,13 +6,14 @@
   <title>PrimeZilla — Eletrônicos & Variedades</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/ersuwnmpqepkaosb85gf" class="logo" alt="PrimeZilla">
   </div>
   <nav class="nav">
-    <a href="index.html">Início</a>
+    <a href="index.html" class="ativo">Início</a>
     <a href="produtos.html">Produtos</a>
     <a href="admin.html">Admin</a>
     <a href="contato.html">Contato</a>
@@ -27,17 +28,18 @@
 </section>
 
 <main class="container">
-  <section class="catalog">
-    <h2>Destaques</h2>
-    <div id="productsGrid" class="grid">Carregando produtos...</div>
-  </section>
+  <h2>Destaques</h2>
+
+  <!-- id igual ao da aba produtos para manter padronização -->
+  <div id="productsGrid" class="grid">Carregando produtos...</div>
 </main>
 
 <footer class="footer">
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
-<script type="module" src="script.js"></script>
-  
+
+
+<!-- ============ FIREBASE LOAD E RENDER ============ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -50,61 +52,89 @@
     appId: "1:910803172382:web:db82186d77b8281f13020f"
   };
 
-  const PHONE = '5567992018672'; // seu WhatsApp
+  const PHONE = '5567992018672';  
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  function esc(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function esc(s){ 
+    return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  const grid = document.getElementById('productsGrid');
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    const grid = document.getElementById('productsGrid');
+
     const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+
     onSnapshot(q, snap => {
       grid.innerHTML = '';
+
       snap.forEach(doc => {
         const p = doc.data();
         if(!p.active) return;
+
         const img = p.imageUrl || p.image || 'placeholder.png';
         const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-        const card = document.createElement('div'); card.className='card';
-        card.innerHTML = `
-          <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
+
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `
+          <div class="media">
+            <img src="${esc(img)}" alt="${esc(p.name)}">
+          </div>
+
           <div class="info">
             <h3>${esc(p.name)}</h3>
             <p class="price">${esc(priceText)}</p>
+
             <div class="controls">
               <label>Qtd
                 <select class="qty"><option>1</option><option>2</option><option>3</option></select>
               </label>
-              <label>${p.type==='pod' ? 'Sabor' : 'Cor'}
-                <select class="variant">${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}</select>
+
+              <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
+                <select class="variant">
+                  ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join('')}
+                </select>
               </label>
+
               <label>Pagamento
-                <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
+                <select class="pay">
+                  <option>PIX</option>
+                  <option>Dinheiro</option>
+                  <option>Cartão</option>
+                </select>
               </label>
-              <button class="btnBuy">Comprar (WhatsApp)</button>
+
+              <button class="btnBuy botao">Comprar (WhatsApp)</button>
             </div>
           </div>
         `;
-        card.querySelector('.btnBuy').addEventListener('click', ()=>{
-          const qtd = card.querySelector('.qty').value;
-          const variant = card.querySelector('.variant').value || '-';
-          const pay = card.querySelector('.pay').value;
-          const variantLabel = (p.type==='pod') ? 'Sabor' : 'Cor';
-          const valorText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-          const text = encodeURIComponent(`Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`);
-          window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
+
+        el.querySelector('.btnBuy').addEventListener('click', () => {
+          const qtd = el.querySelector('.qty').value;
+          const variant = el.querySelector('.variant').value;
+          const pay = el.querySelector('.pay').value;
+          const label = p.type === "pod" ? "Sabor" : "Cor";
+
+          const text = encodeURIComponent(
+            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPreço: ${priceText}\nPagamento: ${pay}`
+          );
+
+          window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
         });
-        grid.appendChild(card);
+
+        grid.appendChild(el);
       });
-      if(grid.innerHTML==='') grid.innerHTML = '<p>Nenhum produto disponível.</p>';
-    }, err=>{
-      grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-      console.error(err);
+
+      if(!grid.innerHTML.trim()){
+        grid.innerHTML = '<p>Nenhum produto disponível.</p>';
+      }
     });
+
   });
 </script>
+
 </body>
 </html>
-<script type="module" src="/script.js"></script>
