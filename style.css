@@ -25,24 +25,16 @@ html,body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ===== CABEÇALHO FIXO ===== */
 .topo {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: #111;
-  padding: 20px; /* você pode ajustar se quiser */
-  height: 180px; /* <-- aqui está a altura que você pediu */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
-
-/* ===== EVITA O CORTE ===== */
 body {
-  padding-top: 180px; /* <-- TEM QUE SER A MESMA ALTURA DO CABEÇALHO */
+  margin: 0;
+  padding-top: 0; /* vai ser ajustado automaticamente */
 }
 
 .logo{
