@@ -1,194 +1,194 @@
-/* =========================
-   PRIMEZILLA - TEMA ESCURO
-   ========================= */
-:root{
-  --bg:#0a0f14;
-  --card:#071226;
-  --muted:#9fb6c3;
-  --accent:#00d4ff;
-  --accent-2:#007ac1;
-  --text:#e6f7ff;
-  --border:rgba(0,212,255,0.06);
-  --panel:#0f1720;
-}
+<!doctype html>
+<html lang="pt-BR">
 
-*{box-sizing:border-box}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PrimeZilla — Eletrônicos & Variedades</title>
 
-html,body{
-  height:100%;
-  margin:0;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  color:var(--text);
-  background:var(--bg);
-  -webkit-font-smoothing:antialiased;
-}
+  <!-- CSS GLOBAL -->
+  <link rel="stylesheet" href="style.css">
+</head>
 
-/* ====== CABEÇALHO FIXO ====== */
-.topo{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 20px;
+<body>
 
-  background:#0a0f14;
-  border-bottom:1px solid rgba(255,255,255,0.06);
+<!-- ==============================
+     CABEÇALHO FIXO
+============================== -->
+<header class="topo">
+  <div class="brand">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
+  </div>
 
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  z-index:999;
-}
+  <nav class="nav">
+    <a href="index.html" class="ativo">Início</a>
+    <a href="produtos.html">Produtos</a>
+    <a href="admin.html">Admin</a>
+    <a href="contato.html">Contato</a>
+  </nav>
+</header>
 
-/* CORREÇÃO PARA NÃO CORTAR O SITE */
-body {
-  padding-top:75px;   /* <-- altura exata do header */
-}
 
-.logo{height:44px}
+<!-- ==============================
+     HERO
+============================== -->
+<section class="hero" style="
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, #00d4ff10, #000);
+  margin-top: 20px;
+">
+  <h1 style="font-size:42px;color:#00d4ff;text-transform:uppercase;margin:0;">
+    PrimeZilla
+  </h1>
+  <p style="color:#ccc;font-size:18px;margin-top:10px;">
+    Eletrônicos & Variedades — entrega rápida em Jardim e Guia Lopes
+  </p>
+</section>
 
-/* container */
-.container{
-  max-width:1100px;
-  margin:18px auto;
-  padding:16px;
-}
 
-/* headings */
-h1,h2{margin:0;color:var(--text)}
-h2{font-size:22px;margin-bottom:12px}
+<!-- ==============================
+     CONTEÚDO PRINCIPAL
+============================== -->
+<main class="container">
 
-/* categories */
-.cats{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:18px;
-}
-.catBtn{
-  background:var(--panel);
-  border:1px solid var(--border);
-  color:var(--muted);
-  padding:8px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  transition:all .12s;
-}
-.catBtn:hover{transform:translateY(-2px)}
-.catBtn.ativo-cat{
-  background:var(--accent);
-  color:#001826;
-  border-color:var(--accent);
-}
+  <section class="catalog">
+    <h2>Destaques</h2>
 
-/* grid */
-.grid{
-  display:grid;
-  gap:18px;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-}
+    <div id="productsGrid" class="grid">
+      Carregando produtos...
+    </div>
 
-/* card */
-.card{
-  background:var(--card);
-  border-radius:12px;
-  padding:14px;
-  border:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  transition:transform .12s, box-shadow .12s;
-}
-.card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 10px 30px rgba(0,0,0,0.45);
-}
+  </section>
 
-/* image */
-.card .media img{
-  width:100%;
-  height:220px;
-  object-fit:cover;
-  border-radius:10px;
-  display:block;
-}
+</main>
 
-/* info */
-.info h3{
-  margin:0;
-  font-size:18px;
-}
-.price{
-  font-weight:700;
-  color:var(--accent);
-  margin-top:6px;
-}
 
-/* controls */
-.controls{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:6px;
-}
-label{
-  font-size:13px;
-  color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-select{
-  padding:9px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.04);
-  background:#071826;
-  color:var(--text);
-  outline:none;
-}
-select:focus{
-  box-shadow:0 0 0 3px rgba(0,212,255,0.06);
-  border-color:var(--accent);
-}
+<!-- ==============================
+     RODAPÉ
+============================== -->
+<footer class="footer">
+  © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
+</footer>
 
-/* button */
-.botao, .btnBuy{
-  display:inline-block;
-  padding:11px 12px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  color:#001826;
-  font-weight:700;
-  text-align:center;
-}
-.botao:hover, .btnBuy:hover{
-  filter:brightness(1.06);
-}
 
-/* misc */
-.msg{
-  padding:12px;
-  border-radius:8px;
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.01);
-  color:var(--muted);
-}
-.small{
-  font-size:13px;
-  color:var(--muted);
-}
+<!-- ==============================
+     FIREBASE + SCRIPT
+============================== -->
+<script type="module">
 
-.footer{
-  padding:20px;
-  text-align:center;
-  color:var(--muted);
-  margin-top:28px;
-}
+  /* ---- IMPORTS FIREBASE ---- */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot } 
+  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* responsive tweaks */
-@media (max-width:640px){
-  .card .media img{height:160px}
-  .controls{gap:8px}
-}
+  /* ---- CONFIG FIREBASE ---- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+    authDomain: "primezilla-70b94.firebaseapp.com",
+    projectId: "primezilla-70b94",
+    storageBucket: "primezilla-70b94.firebasestorage.app",
+    appId: "1:910803172382:web:db82186d77b8281f13020f"
+  };
+
+  const PHONE = '5567992018672';
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, m =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'" : '&#39;' }[m])
+    );
+  }
+
+  /* ---- CARREGAR PRODUTOS EM TEMPO REAL ---- */
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const grid = document.getElementById('productsGrid');
+    const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+
+    onSnapshot(q, snap => {
+
+      grid.innerHTML = '';
+
+      snap.forEach(doc => {
+
+        const p = doc.data();
+        if (!p.active) return;
+
+        const img = p.imageUrl || p.image || 'placeholder.png';
+        const priceText = p.price
+          ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+          : 'Consultar valores';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+          <div class="media">
+            <img src="${esc(img)}" alt="${esc(p.name)}">
+          </div>
+
+          <div class="info">
+            <h3>${esc(p.name)}</h3>
+            <p class="price">${esc(priceText)}</p>
+
+            <div class="controls">
+
+              <label>Quantidade
+                <select class="qty">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                </select>
+              </label>
+
+              <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
+                <select class="variant">
+                  ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join('')}
+                </select>
+              </label>
+
+              <label>Pagamento
+                <select class="pay">
+                  <option>PIX</option>
+                  <option>Dinheiro</option>
+                  <option>Cartão</option>
+                </select>
+              </label>
+
+              <button class="btnBuy">Comprar (WhatsApp)</button>
+
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.btnBuy').addEventListener('click', () => {
+
+          const qtd = card.querySelector('.qty').value;
+          const variant = card.querySelector('.variant').value || '-';
+          const pay = card.querySelector('.pay').value;
+          const label = p.type === 'pod' ? 'Sabor' : 'Cor';
+
+          const text = encodeURIComponent(
+            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+          );
+
+          window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
+        });
+
+        grid.appendChild(card);
+
+      });
+
+      if (grid.innerHTML === '')
+        grid.innerHTML = '<p>Nenhum produto disponível.</p>';
+
+    });
+  });
+
+</script>
+
+</body>
+</html>
