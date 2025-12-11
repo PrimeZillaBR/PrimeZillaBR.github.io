@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PrimeZilla</title>
-
 <style>
 /* =========================
    PRIMEZILLA - TEMA ESCURO
@@ -31,7 +30,7 @@ html,body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ===== CABEÇALHO FIXO ===== */
+/* ===== CABEÇALHO FIXO (ALTURA EXATA DA LOGO) ===== */
 .topo {
   position: fixed;
   top: 0;
@@ -39,19 +38,13 @@ html,body{
   width: 100%;
   z-index: 1000;
   background: #111;
-  padding: 20px 25px; /* 20 em cima + 20 embaixo */
-  height: 140px;      /* altura real do conteúdo */
+  padding: 10px 20px; /* Pequeno e ajustado */
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* ===== EVITA O CORTE ===== */
-body {
-  padding-top: 180px; /* 140 (height) + 40 (padding total) */
-}
-
-/* Logo */
+/* Logo EXATA */
 .logo{
   height:44px;
 }
@@ -209,8 +202,16 @@ select:focus{
   .controls{gap:8px}
 }
 </style>
-</head>
 
+<script>
+/* Ajusta o padding-top automaticamente para nunca cortar */
+window.onload = function(){
+  const topo = document.querySelector(".topo");
+  document.body.style.paddingTop = topo.offsetHeight + "px";
+};
+</script>
+
+</head>
 <body>
 
 <!-- ===================== -->
@@ -218,7 +219,6 @@ select:focus{
 <!-- ===================== -->
 <div class="topo">
   <img src="sua-logo.png" alt="Logo" class="logo">
-
   <nav>
     <a href="#" style="color:white; margin-right:20px;">Início</a>
     <a href="#" style="color:white; margin-right:20px;">Produtos</a>
@@ -240,7 +240,6 @@ select:focus{
   </div>
 
   <div class="grid">
-
     <div class="card">
       <div class="media">
         <img src="img/produto1.jpg">
@@ -256,7 +255,6 @@ select:focus{
       </div>
       <button class="btnBuy">Comprar</button>
     </div>
-
   </div>
 </div>
 
