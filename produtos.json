@@ -1,19 +1,5 @@
 [
   {
-    "name": "IGNITE V50",
-    "price": 70,
-    "currency": "R$",
-    "category": "pods",
-    "type": "pod",
-    "options": [
-      "mentol",
-      "morango",
-      "ice"
-    ],
-    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765412659/c4cp49meyuy6mzvuufy2.jpg",
-    "active": true
-  },
-  {
     "name": "LIFE POD 10K + CASE",
     "price": 130,
     "currency": "R$",
