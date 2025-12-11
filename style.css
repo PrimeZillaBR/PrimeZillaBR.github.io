@@ -1,39 +1,193 @@
-:root{
-  --bg:#03060a;
-  --neon:#00d4ff;
-  --accent:#007ac1;
-  --card:#071226;
-  --muted:#9fb6c3;
-  --text:#e6f7ff;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#061524);color:var(--text)}
-.topo{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.2)}
-.logo{height:68px}
+/* -------------------- */
+/*   ESTILO GLOBAL      */
+/* -------------------- */
 
-/* AQUI ESTÁ O CORRETO! 🎯 */
-nav a{
-  margin:0 12px;
-  color:var(--neon);
-  text-decoration:none;
-  font-weight:700;
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #f7f9fc;
+  color: #333;
 }
 
-.hero{padding:40px 20px;text-align:center}
-.hero.neon{background:linear-gradient(180deg,rgba(0,0,0,0.2),transparent);border-bottom:1px solid rgba(0,255,255,0.02)}
-.hero-inner h1{font-size:46px;color:var(--neon);text-shadow:0 6px 30px rgba(0,212,255,0.06)}
-.container{max-width:1200px;margin:20px auto;padding:0 16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-.card{background:linear-gradient(180deg,var(--card),#052233);padding:12px;border-radius:12px;border:1px solid rgba(0,212,255,0.06);box-shadow:0 8px 30px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:8px}
-.card img{width:100%;height:180px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.02)}
-.card h3{margin:6px 0 0;font-size:18px;color:var(--text)}
-.price{font-weight:900;color:var(--neon);font-size:20px}
-.controls{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.controls label{font-size:13px;color:var(--muted)}
-.btnBuy{background:linear-gradient(90deg,var(--neon),var(--accent));color:#001826;border:none;padding:10px;border-radius:10px;font-weight:900;cursor:pointer}
-.wrap{max-width:980px;margin:18px auto;padding:12px}
-input, select{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#061427;color:var(--text);width:100%;box-sizing:border-box}
-.botao{background:linear-gradient(90deg,var(--neon),var(--accent));color:#001826;border:none;padding:10px 12px;border-radius:8px;font-weight:800;cursor:pointer}
-.small{color:var(--muted);font-size:13px}
-.footer{padding:18px;text-align:center;color:var(--muted);margin-top:40px}
-@media(max-width:760px){.logo{height:52px}.hero-inner h1{font-size:32px}}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* -------------------- */
+/*     HEADER/NAV       */
+/* -------------------- */
+
+.topo {
+  background: #ffffff;
+  border-bottom: 1px solid #e4e7ee;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 48px;
+}
+
+.nav a {
+  margin-left: 22px;
+  font-weight: 500;
+  color: #333;
+  transition: 0.2s;
+}
+
+.nav a:hover {
+  color: #0095f6;
+}
+
+/* -------------------- */
+/*     HERO BANNER      */
+/* -------------------- */
+
+.hero {
+  background: #0095f6;
+  color: white;
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 38px;
+  margin: 0;
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+/* -------------------- */
+/*     CONTAINER        */
+/* -------------------- */
+
+.container {
+  max-width: 1180px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* -------------------- */
+/*   GRID DE PRODUTOS   */
+/* -------------------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+/* -------------------- */
+/*   CARD DO PRODUTO    */
+/* -------------------- */
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e6ef;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  padding: 16px;
+  transition: 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.media img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* -------------------- */
+/*  INFO DO PRODUTO     */
+/* -------------------- */
+
+.info h3 {
+  font-size: 19px;
+  margin: 12px 0 4px;
+  font-weight: 600;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0095f6;
+  margin-bottom: 10px;
+}
+
+/* -------------------- */
+/* OPÇÕES / SELEÇÕES    */
+/* -------------------- */
+
+.controls {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d4d9e1;
+  background: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+select:focus {
+  border-color: #0095f6;
+}
+
+/* -------------------- */
+/* BOTÃO DE COMPRA      */
+/* -------------------- */
+
+.btnBuy {
+  margin-top: 8px;
+  width: 100%;
+  padding: 12px;
+  background: #0095f6;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btnBuy:hover {
+  background: #007bd8;
+}
+
+/* -------------------- */
+/*     FOOTER           */
+/* -------------------- */
+
+.footer {
+  margin-top: 40px;
+  padding: 25px;
+  background: #ffffff;
+  border-top: 1px solid #e6e8ef;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
