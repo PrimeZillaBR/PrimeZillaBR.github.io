@@ -152,18 +152,18 @@ select {
 </style>
 </head>
 
-<body>
-<header class="topo">
-  <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
-  </div>
-  <nav class="nav">
-    <a href="index.html" class="ativo">Início</a>
-    <a href="produtos.html">Produtos</a>
-    <a href="admin.html">Admin</a>
-    <a href="contato.html">Contato</a>
-  </nav>
-</header>
+html,body{
+  height:100%;
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  color:var(--text);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+
+body{
+  padding-top: 80px; /* impede o conteúdo de ficar escondido atrás do cabeçalho */
+}
 
 <main class="container">
   <h2>Produtos</h2>
