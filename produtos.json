@@ -1,15 +1,5 @@
 [
   {
-    "name": "logo",
-    "price": null,
-    "currency": "R$",
-    "category": "pods",
-    "type": "non-pod",
-    "options": [],
-    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765415779/jq5bm4gwdwi3kpxgrago.png",
-    "active": true
-  },
-  {
     "name": "copo termico 1,2l",
     "price": 120,
     "currency": "R$",
