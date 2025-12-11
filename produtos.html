@@ -4,38 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Produtos — PrimeZilla</title>
-
 <link rel="stylesheet" href="style.css">
 
 <style>
-
-/* ======== ESTILO MODELO LIFEPOD ======== */
-
+/* ======== ESTILO GLOBAL (IGUAL DAS OUTRAS PÁGINAS) ======== */
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: "Inter", sans-serif;
 }
-
 .container {
   padding: 20px;
   max-width: 1100px;
   margin: auto;
 }
-
 h2 {
   font-size: 26px;
   margin-bottom: 16px;
 }
 
-/* CATEGORIAS */
+/* ======== CATEGORIAS ======== */
 .cats {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
 .catBtn {
   background: #111;
   border: 1px solid #333;
@@ -45,22 +39,21 @@ h2 {
   cursor: pointer;
   transition: .2s;
 }
-
-.catBtn:hover, 
+.catBtn:hover,
 .catBtn.ativo-cat {
   background: #00d4ff;
   border-color: #00d4ff;
   color: #000;
 }
 
-/* GRADE DE PRODUTOS */
+/* ======== GRID DE PRODUTOS ======== */
 .grid {
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-/* CARD ESTILO LIFEPOD */
+/* ======== CARD ======== */
 .card {
   background: #141414;
   border-radius: 14px;
@@ -73,7 +66,7 @@ h2 {
   border-color: #00d4ff;
 }
 
-/* IMAGEM */
+/* ======== IMAGEM ======== */
 .card .media img {
   width: 100%;
   height: 230px;
@@ -81,12 +74,11 @@ h2 {
   object-fit: cover;
 }
 
-/* INFO */
+/* ======== INFORMAÇÕES ======== */
 .card .info h3 {
   margin: 10px 0 6px 0;
   font-size: 20px;
 }
-
 .price {
   font-weight: bold;
   color: #00d4ff;
@@ -94,20 +86,18 @@ h2 {
   font-size: 18px;
 }
 
-/* CONTROLES */
+/* ======== CONTROLES ======== */
 .controls {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 label {
   display: flex;
   flex-direction: column;
   font-size: 14px;
   color: #ddd;
 }
-
 select {
   background: #0d0d0d;
   border: 1px solid #333;
@@ -117,7 +107,7 @@ select {
   border-radius: 6px;
 }
 
-/* BOTÃO DE COMPRA */
+/* ======== BOTÃO (IGUAL CONTATO E ADMIN) ======== */
 .botao {
   background: linear-gradient(90deg, #00d4ff, #007ac1);
   color: #000;
@@ -128,20 +118,19 @@ select {
   cursor: pointer;
   margin-top: 6px;
   transition: .2s;
+  text-align: center;
 }
-
 .botao:hover {
   filter: brightness(1.2);
 }
-
 </style>
 </head>
-
 <body>
 
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago"
+         class="logo" alt="PrimeZilla">
   </div>
   <nav class="nav">
     <a href="index.html">Início</a>
@@ -170,21 +159,16 @@ select {
 </footer>
 
 <script>
-/* === SEU SCRIPT (SEM MUDAR LÓGICA) === */
-
+/* === SEU SCRIPT ORIGINAL (SEM ALTERAR LÓGICA) === */
 const PHONE = "5567992018672";
-
 function esc(s){
   return String(s||'').replace(/[&<>"']/g, m =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
   );
 }
-
 const grid = document.getElementById('productsGrid');
 const catButtons = [...document.querySelectorAll('.catBtn')];
-
 let produtos = [];
-
 async function loadProdutos(){
   grid.innerHTML = 'Carregando...';
   try {
@@ -196,77 +180,58 @@ async function loadProdutos(){
     grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
   }
 }
-
 function render(filter){
   grid.innerHTML = "";
-
   produtos.forEach(p => {
     if(p.active === false) return;
     if(filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
-
     const img = p.imageUrl || p.image || "placeholder.png";
     const priceText = p.price !== undefined
       ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
       : "Consultar valores";
-
     const card = document.createElement("div");
     card.className = "card";
-
     card.innerHTML = `
       <div class="media"><img src="${esc(img)}"></div>
       <div class="info">
         <h3>${esc(p.name)}</h3>
         <p class="price">${esc(priceText)}</p>
-
         <div class="controls">
-
           <label>Quantidade
             <select class="qty">
               <option>1</option><option>2</option><option>3</option>
             </select>
           </label>
-
           <label>${p.type === "pod" ? "Sabor" : "Cor"}
             <select class="variant">
               ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
             </select>
           </label>
-
           <label>Pagamento
             <select class="pay">
               <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
             </select>
           </label>
-
           <button class="botao btnBuy">Comprar no WhatsApp</button>
-
         </div>
       </div>
     `;
-
     card.querySelector(".btnBuy").addEventListener("click", () => {
       const qtd = card.querySelector(".qty").value;
       const variant = card.querySelector(".variant").value;
       const pay = card.querySelector(".pay").value;
-
       const label = p.type === "pod" ? "Sabor" : "Cor";
-
       const message = encodeURIComponent(
         `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
       );
-
       window.open(`https://wa.me/${PHONE}?text=${message}`, "_blank");
     });
-
     grid.appendChild(card);
   });
-
   if(!grid.children.length){
     grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
   }
 }
-
-// eventos de clique
 catButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     catButtons.forEach(b => b.classList.remove("ativo-cat"));
@@ -274,7 +239,6 @@ catButtons.forEach(btn => {
     render(btn.dataset.cat);
   });
 });
-
 loadProdutos();
 </script>
 
