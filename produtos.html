@@ -1,22 +1,18 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Produtos — PrimeZilla</title>
   <link rel="stylesheet" href="style.css">
 
 <style>
-/* ======== ESTILO MODELO LIFEPOD (MESMO DO INDEX) ======== */
+/* ======== ESTILO MODELO LIFEPOD ======== */
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: "Inter", sans-serif;
-  margin: 0;
-  padding: 0;
 }
-
-/* TOPO */
 .topo {
   background: #111;
   border-bottom: 1px solid #222;
@@ -34,12 +30,11 @@ body {
   text-decoration: none;
   font-weight: 500;
 }
-.nav a:hover,
-.nav .ativo {
+.nav .ativo,
+.nav a:hover {
   color: #00d4ff;
 }
 
-/* CONTAINER */
 .container {
   padding: 20px;
   max-width: 1100px;
@@ -48,6 +43,29 @@ body {
 h2 {
   font-size: 26px;
   margin-bottom: 20px;
+}
+
+/* CATEGORIAS */
+.cats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.catBtn {
+  background: #111;
+  border: 1px solid #333;
+  color: #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: .2s;
+}
+.catBtn:hover,
+.catBtn.ativo-cat {
+  background: #00d4ff;
+  color: #000;
+  border-color: #00d4ff;
 }
 
 /* GRID */
@@ -76,13 +94,14 @@ h2 {
   object-fit: cover;
 }
 .card .info h3 {
-  margin: 10px 0 6px;
   font-size: 20px;
+  margin: 10px 0 6px;
 }
 .price {
   color: #00d4ff;
   font-size: 18px;
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
 /* CONTROLES */
@@ -101,7 +120,6 @@ select {
   color: #fff;
   padding: 8px;
   border-radius: 6px;
-  margin-top: 4px;
 }
 
 /* BOTÃO */
@@ -113,19 +131,17 @@ select {
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: .2s;
 }
 .btnBuy:hover {
   filter: brightness(1.2);
 }
 
-/* RODAPÉ */
 .footer {
   text-align: center;
   padding: 20px;
   color: #777;
-  margin-top: 40px;
   border-top: 1px solid #111;
+  margin-top: 40px;
 }
 </style>
 </head>
@@ -134,21 +150,28 @@ select {
 
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo">
   </div>
   <nav class="nav">
     <a href="index.html">Início</a>
-    <a href="produtos.html" class="ativo">Produtos</a>
+    <a class="ativo" href="produtos.html">Produtos</a>
     <a href="admin.html">Admin</a>
     <a href="contato.html">Contato</a>
   </nav>
 </header>
 
 <main class="container">
-  <section class="catalog">
-    <h2>Todos os Produtos</h2>
-    <div id="productsGrid" class="grid">Carregando produtos...</div>
-  </section>
+  <h2>Produtos</h2>
+
+  <div class="cats">
+    <button class="catBtn ativo-cat" data-cat="all">Todos</button>
+    <button class="catBtn" data-cat="pods">Pods</button>
+    <button class="catBtn" data-cat="acessorios">Acessórios</button>
+    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
+    <button class="catBtn" data-cat="outros">Outros</button>
+  </div>
+
+  <div id="productsGrid" class="grid">Carregando...</div>
 </main>
 
 <footer class="footer">
@@ -156,84 +179,116 @@ select {
 </footer>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-    authDomain: "primezilla-70b94.firebaseapp.com",
-    projectId: "primezilla-70b94",
-    storageBucket: "primezilla-70b94.firebasestorage.app",
-    appId: "1:910803172382:web:db82186d77b8281f13020f"
+const firebaseConfig = {
+  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+  authDomain: "primezilla-70b94.firebaseapp.com",
+  projectId: "primezilla-70b94",
+  storageBucket: "primezilla-70b94.firebasestorage.app",
+  appId: "1:910803172382:web:db82186d77b8281f13020f"
+};
+
+const PHONE = "5567992018672";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* === FUNÇÃO DE ESCAPAR === */
+function esc(s){
+  return String(s||'').replace(/[&<>"']/g,
+    m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+  );
+}
+
+const grid = document.getElementById("productsGrid");
+const catBtns = [...document.querySelectorAll(".catBtn")];
+let produtos = [];
+let categoriaAtual = "all";
+
+catBtns.forEach(btn => {
+  btn.onclick = () => {
+    catBtns.forEach(b => b.classList.remove("ativo-cat"));
+    btn.classList.add("ativo-cat");
+    categoriaAtual = btn.dataset.cat;
+    render();
   };
+});
 
-  const PHONE = '5567992018672';
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+onSnapshot(q, snap => {
+  produtos = [];
+  snap.forEach(doc => produtos.push({ id: doc.id, ...doc.data() }));
+  render();
+});
 
-  function esc(s){
-    return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
+function render(){
+  grid.innerHTML = "";
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const grid = document.getElementById('productsGrid');
-    const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+  produtos.forEach(p => {
+    if(!p.active) return;
 
-    onSnapshot(q, snap => {
-      grid.innerHTML = '';
-      snap.forEach(doc => {
-        const p = doc.data();
-        if(!p.active) return;
+    const cat = (p.category || "").toLowerCase();
+    if(categoriaAtual !== "all" && cat !== categoriaAtual) return;
 
-        const img = p.imageUrl || p.image || 'placeholder.png';
-        const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
+    const img = p.imageUrl || p.image || "placeholder.png";
+    const priceText = p.price ? `${p.currency || "R$"} ${Number(p.price).toFixed(2)}` : "Consultar valores";
 
-        const card = document.createElement('div');
-        card.className='card';
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="media"><img src="${esc(img)}"></div>
+      <div class="info">
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${esc(priceText)}</p>
 
-        card.innerHTML = `
-          <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
-          <div class="info">
-            <h3>${esc(p.name)}</h3>
-            <p class="price">${esc(priceText)}</p>
-            <div class="controls">
-              <label>Quantidade
-                <select class="qty"><option>1</option><option>2</option><option>3</option></select>
-              </label>
+        <div class="controls">
+          <label>Quantidade
+            <select class="qty">
+              <option>1</option><option>2</option><option>3</option>
+            </select>
+          </label>
 
-              <label>${p.type==='pod' ? 'Sabor' : 'Cor'}
-                <select class="variant">
-                  ${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}
-                </select>
-              </label>
+          <label>${p.type === "pod" ? "Sabor" : "Cor"}
+            <select class="variant">
+              ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
+            </select>
+          </label>
 
-              <label>Pagamento
-                <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
-              </label>
+          <label>Pagamento
+            <select class="pay">
+              <option>PIX</option>
+              <option>Dinheiro</option>
+              <option>Cartão</option>
+            </select>
+          </label>
 
-              <button class="btnBuy">Comprar (WhatsApp)</button>
-            </div>
-          </div>
-        `;
+          <button class="btnBuy">Comprar no WhatsApp</button>
+        </div>
+      </div>
+    `;
 
-        card.querySelector('.btnBuy').addEventListener('click', ()=>{
-          const qtd = card.querySelector('.qty').value;
-          const variant = card.querySelector('.variant').value || '-';
-          const pay = card.querySelector('.pay').value;
-          const label = p.type==='pod' ? 'Sabor' : 'Cor';
+    card.querySelector(".btnBuy").onclick = () => {
+      const qtd = card.querySelector(".qty").value;
+      const variant = card.querySelector(".variant").value;
+      const pay = card.querySelector(".pay").value;
+      const label = p.type === "pod" ? "Sabor" : "Cor";
 
-          const text = encodeURIComponent(
-            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
-          );
-          window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
-        });
+      const text = encodeURIComponent(
+        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+      );
 
-        grid.appendChild(card);
-      });
+      window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
+    };
 
-      if(grid.innerHTML==='') grid.innerHTML = '<p>Nenhum produto disponível.</p>';
-    });
+    grid.appendChild(card);
   });
+
+  if(grid.children.length === 0){
+    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
+  }
+}
 </script>
 
 </body>
