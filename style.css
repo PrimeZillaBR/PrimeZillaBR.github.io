@@ -23,35 +23,33 @@ html,body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* =========================
-      CABEÇALHO FIXO
-========================= */
+/* ===== CABEÇALHO FIXO CORRIGIDO ===== */
 .topo {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-
+  
   background: #111;
-  padding: 25px 20px;
-
-  /* Altura REAL do cabeçalho */
-  min-height: 180px;
-
+  padding: 35px 20px; /* altura automática */
+  
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap; /* IMPORTANTE: evita cortar no mobile */
+  flex-wrap: wrap;
+  
+  border-bottom: 2px solid var(--accent);
 }
 
-/* COMPENSAÇÃO DO CABEÇALHO */
+/* ===== EVITA CORTE AUTOMATICAMENTE ===== */
 body {
-  padding-top: 190px; /* 10px extra evita corte em qualquer layout */
+  padding-top: 220px; 
+  /* Se ainda cortar, aumente aqui para 250px */
 }
 
-.logo {
-  height: 60px;
+.logo{
+  height:60px;
 }
 
 /* container */
@@ -201,26 +199,12 @@ select:focus{
   margin-top:28px;
 }
 
-/* =========================
-     RESPONSIVO (MOBILE)
-========================= */
+/* responsive tweaks */
 @media (max-width:640px){
+  .card .media img{height:160px}
+  .controls{gap:8px}
+  
   body{
-    padding-top: 220px; /* Header maior no mobile */
-  }
-
-  .topo{
-    min-height: 200px;
-    padding: 30px 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .logo{
-    height: 70px;
-  }
-
-  .card .media img{
-    height:160px;
+    padding-top:260px; /* cabeçalho ocupa mais espaço no mobile */
   }
 }
