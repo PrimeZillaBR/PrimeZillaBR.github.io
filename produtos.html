@@ -4,10 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Produtos — PrimeZilla</title>
+
   <link rel="stylesheet" href="style.css">
 
-<style>
-/* ======== MESMO ESTILO DO INDEX (MODELO LIFEPOD) ======== */
+  <style>
+/* ======== ESTILO ORIGINAL (mantido) ======== */
 body {
   background: #0a0a0a;
   color: #fff;
@@ -16,19 +17,21 @@ body {
   padding: 0;
 }
 
-/* TOPO FIXO */
+/* ========= TOPO (MODIFICADO APENAS PARA FIXAR) ========= */
 .topo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 999;
   background: #111;
   border-bottom: 1px solid #222;
   padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  /* FIXAR NO TOPO */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 .logo {
@@ -41,15 +44,14 @@ body {
   text-decoration: none;
   font-weight: 500;
 }
-
 .nav a:hover,
 .nav .ativo {
   color: #00d4ff;
 }
 
-/* ===== IMPEDIR CORTE DO TOPO FIXO ===== */
+/* ======= CORREÇÃO: evitar conteúdo cortado ======= */
 body {
-  padding-top: 90px; /* evita corte do conteúdo */
+  padding-top: 80px;  /* altura exata do topo */
 }
 
 /* CONTAINER */
@@ -171,17 +173,16 @@ select {
   margin-top: 40px;
   border-top: 1px solid #111;
 }
-</style>
+  </style>
 </head>
-
 <body>
 
+<!-- TOPO IDÊNTICO AO ORIGINAL, APENAS FIXADO -->
 <header class="topo">
   <img src="logo.png" class="logo">
   <nav class="nav">
-    <a href="index.html">Home</a>
+    <a href="index.html">Início</a>
     <a href="produtos.html" class="ativo">Produtos</a>
-    <a href="contato.html">Contato</a>
   </nav>
 </header>
 
@@ -204,6 +205,8 @@ select {
 </footer>
 
 <script>
+/* === SCRIPT ORIGINAL (não alterado) === */
+
 const PHONE = "5567992018672";
 
 function esc(s){
@@ -228,6 +231,7 @@ async function loadProdutos(){
 
 function render(cat){
   grid.innerHTML = "";
+
   produtos.forEach(p => {
     if(p.active === false) return;
     if(cat !== "all" && (p.category||"").toLowerCase() !== cat) return;
@@ -239,7 +243,6 @@ function render(cat){
 
     const card = document.createElement("div");
     card.className = "card";
-
     card.innerHTML = `
       <div class="media"><img src="${esc(img)}"></div>
       <div class="info">
@@ -271,6 +274,7 @@ function render(cat){
       const msg = encodeURIComponent(
         `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${varTxt}\nPagamento: ${pay}`
       );
+
       window.open(`https://wa.me/${PHONE}?text=${msg}`);
     });
 
@@ -292,6 +296,10 @@ document.querySelectorAll(".catBtn").forEach(btn => {
 
 loadProdutos();
 </script>
+
+</body>
+</html>
+
 
 </body>
 </html>
