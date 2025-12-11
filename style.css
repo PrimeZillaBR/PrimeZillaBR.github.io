@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PrimeZilla</title>
 <style>
-/* =========================
-   PRIMEZILLA - TEMA ESCURO
-   ========================= */
 :root{
   --bg:#0a0f14;
   --card:#071226;
@@ -18,213 +15,90 @@
   --border:rgba(0,212,255,0.06);
   --panel:#0f1720;
 }
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box;}
 html,body{
-  height:100%;
   margin:0;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  color:var(--text);
+  font-family:Inter,system-ui;
   background:var(--bg);
-  -webkit-font-smoothing:antialiased;
+  color:var(--text);
 }
 
-/* ===== CABEÇALHO FIXO ===== */
-.topo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  background: #111;
-  padding: 19px 25px; /* padding reduzido */
-  height: 55px;       /* altura reduzida */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ============================
+      CABEÇALHO FIXO
+   ============================ */
+.topo{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  z-index:1000;
+  background:#111;
+  padding:14px 20px;  /* TOPO REDUZIDO */
+  height:90px;        /* ALTURA FINAL */
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-/* ===== EVITA O CORTE ===== */
-body {
-  padding-top: 93px; /* ajuste exato da nova altura total */
+/* evita corte no PC */
+body{
+  padding-top: 90px;
 }
 
-/* Logo EXATA */
 .logo{
-  height:44px;
+  height:40px;
 }
 
-/* container */
+/* ============================
+      MOBILE AJUSTADO
+   ============================ */
+@media (max-width:700px){
+
+  .topo{
+    padding:12px 18px;
+    height:70px;       /* topo menor no celular */
+  }
+
+  body{
+    padding-top:70px;  /* acompanha a altura do topo */
+  }
+
+  .logo{
+    height:32px;
+  }
+}
+
+/* resto do estilo do site */
 .container{
   max-width:1100px;
   margin:18px auto;
   padding:16px;
 }
-
-/* headings */
-h1,h2{
-  margin:0;
-  color:var(--text);
-}
-h2{
-  font-size:22px;
-  margin-bottom:12px;
-}
-
-/* categories */
-.cats{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:18px;
-}
-.catBtn{
-  background:var(--panel);
-  border:1px solid var(--border);
-  color:var(--muted);
-  padding:8px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  transition:all .12s;
-}
-.catBtn:hover{
-  transform:translateY(-2px);
-}
-.catBtn.ativo-cat{
-  background:var(--accent);
-  color:#001826;
-  border-color:var(--accent);
-}
-
-/* grid */
 .grid{
   display:grid;
   gap:18px;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 }
-
-/* card */
 .card{
   background:var(--card);
   border-radius:12px;
   padding:14px;
   border:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  transition:transform .12s, box-shadow .12s;
 }
-.card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 10px 30px rgba(0,0,0,0.45);
-}
-
-/* image */
 .card .media img{
   width:100%;
   height:220px;
   object-fit:cover;
   border-radius:10px;
-  display:block;
-}
-
-/* info */
-.info h3{
-  margin:0;
-  font-size:18px;
-}
-.price{
-  font-weight:700;
-  color:var(--accent);
-  margin-top:6px;
-}
-
-/* controls */
-.controls{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:6px;
-}
-label{
-  font-size:13px;
-  color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-select{
-  padding:9px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.04);
-  background:#071826;
-  color:var(--text);
-  outline:none;
-}
-select:focus{
-  box-shadow:0 0 0 3px rgba(0,212,255,0.06);
-  border-color:var(--accent);
-}
-
-/* button */
-.botao, .btnBuy{
-  display:inline-block;
-  padding:11px 12px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  color:#001826;
-  font-weight:700;
-  text-align:center;
-}
-.botao:hover, .btnBuy:hover{
-  filter:brightness(1.06);
-}
-
-/* misc */
-.msg{
-  padding:12px;
-  border-radius:8px;
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.01);
-  color:var(--muted);
-}
-.small{
-  font-size:13px;
-  color:var(--muted);
-}
-.footer{
-  padding:20px;
-  text-align:center;
-  color:var(--muted);
-  margin-top:28px;
-}
-
-/* responsive */
-@media (max-width:640px){
-  .card .media img{height:160px}
-  .controls{gap:8px}
 }
 </style>
-
-<script>
-/* Ajusta o padding-top automaticamente para nunca cortar */
-window.onload = function(){
-  const topo = document.querySelector(".topo");
-  document.body.style.paddingTop = topo.offsetHeight + "px";
-};
-</script>
-
 </head>
+
 <body>
 
-<!-- ===================== -->
-<!--       CABEÇALHO       -->
-<!-- ===================== -->
+<!-- CABEÇALHO -->
 <div class="topo">
-  <img src="sua-logo.png" alt="Logo" class="logo">
+  <img src="sua-logo.png" class="logo">
   <nav>
     <a href="#" style="color:white; margin-right:20px;">Início</a>
     <a href="#" style="color:white; margin-right:20px;">Produtos</a>
@@ -232,37 +106,25 @@ window.onload = function(){
   </nav>
 </div>
 
-<!-- ===================== -->
-<!--     CONTEÚDO SITE     -->
-<!-- ===================== -->
+<!-- CONTEÚDO -->
 <div class="container">
   <h1>Produtos</h1>
-
-  <div class="cats">
-    <button class="catBtn ativo-cat">Todos</button>
-    <button class="catBtn">Boosters</button>
-    <button class="catBtn">Skins</button>
-    <button class="catBtn">VIP</button>
-  </div>
 
   <div class="grid">
     <div class="card">
       <div class="media">
         <img src="img/produto1.jpg">
       </div>
-      <div class="info">
-        <h3>Produto Exemplo</h3>
-        <div class="price">R$ 29,90</div>
-      </div>
-      <div class="controls">
-        <label>Tamanho:
-          <select><option>Padrão</option></select>
-        </label>
-      </div>
+      <h3>Produto Exemplo</h3>
+      <div class="price">R$ 29,90</div>
       <button class="btnBuy">Comprar</button>
     </div>
   </div>
 </div>
+
+</body>
+</html>
+
 
 </body>
 </html>
