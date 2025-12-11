@@ -8,7 +8,6 @@
 
 <style>
 /* ======== MESMO ESTILO DO INDEX (MODELO LIFEPOD) ======== */
-
 body {
   background: #0a0a0a;
   color: #fff;
@@ -17,8 +16,13 @@ body {
   padding: 0;
 }
 
-/* TOPO */
+/* TOPO FIXO */
 .topo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
   background: #111;
   border-bottom: 1px solid #222;
   padding: 12px 20px;
@@ -26,18 +30,26 @@ body {
   justify-content: space-between;
   align-items: center;
 }
+
 .logo {
   height: 50px;
 }
+
 .nav a {
   color: #ccc;
   margin-left: 20px;
   text-decoration: none;
   font-weight: 500;
 }
+
 .nav a:hover,
 .nav .ativo {
   color: #00d4ff;
+}
+
+/* ===== IMPEDIR CORTE DO TOPO FIXO ===== */
+body {
+  padding-top: 90px; /* evita corte do conteúdo */
 }
 
 /* CONTAINER */
@@ -46,6 +58,7 @@ body {
   max-width: 1100px;
   margin: auto;
 }
+
 h2 {
   font-size: 26px;
   margin-bottom: 20px;
@@ -57,6 +70,7 @@ h2 {
   gap: 10px;
   margin-bottom: 20px;
 }
+
 .catBtn {
   background: #111;
   border: 1px solid #222;
@@ -66,6 +80,7 @@ h2 {
   cursor: pointer;
   transition: .2s;
 }
+
 .catBtn:hover,
 .ativo-cat {
   border-color: #00d4ff;
@@ -87,20 +102,24 @@ h2 {
   transition: .2s;
   border: 1px solid #1f1f1f;
 }
+
 .card:hover {
   transform: scale(1.02);
   border-color: #00d4ff;
 }
+
 .card .media img {
   width: 100%;
   height: 230px;
   border-radius: 12px;
   object-fit: cover;
 }
+
 .card .info h3 {
   margin: 10px 0 6px;
   font-size: 20px;
 }
+
 .price {
   color: #00d4ff;
   font-size: 18px;
@@ -113,10 +132,12 @@ h2 {
   flex-direction: column;
   gap: 10px;
 }
+
 label {
   font-size: 14px;
   color: #ddd;
 }
+
 select {
   background: #0d0d0d;
   border: 1px solid #333;
@@ -137,6 +158,7 @@ select {
   cursor: pointer;
   transition: .2s;
 }
+
 .btnBuy:hover {
   filter: brightness(1.2);
 }
@@ -152,18 +174,16 @@ select {
 </style>
 </head>
 
-html,body{
-  height:100%;
-  margin:0;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  color:var(--text);
-  background:var(--bg);
-  -webkit-font-smoothing:antialiased;
-}
+<body>
 
-body{
-  padding-top: 80px; /* impede o conteúdo de ficar escondido atrás do cabeçalho */
-}
+<header class="topo">
+  <img src="logo.png" class="logo">
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="produtos.html" class="ativo">Produtos</a>
+    <a href="contato.html">Contato</a>
+  </nav>
+</header>
 
 <main class="container">
   <h2>Produtos</h2>
@@ -219,6 +239,7 @@ function render(cat){
 
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `
       <div class="media"><img src="${esc(img)}"></div>
       <div class="info">
@@ -246,6 +267,7 @@ function render(cat){
       const varTxt = card.querySelector(".variant").value;
       const pay = card.querySelector(".pay").value;
       const label = (p.type==="pod") ? "Sabor" : "Cor";
+
       const msg = encodeURIComponent(
         `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${varTxt}\nPagamento: ${pay}`
       );
@@ -270,5 +292,6 @@ document.querySelectorAll(".catBtn").forEach(btn => {
 
 loadProdutos();
 </script>
+
 </body>
 </html>
