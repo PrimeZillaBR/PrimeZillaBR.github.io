@@ -37,91 +37,120 @@
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<script>
+/*
+  Versão: carrega produtos do arquivo produtos.json (GitHub)
+  - Mantém filtragem por categoria
+  - Aceita produtos sem campo `active` (exibe se active !== false)
+  - Link de compra abre WhatsApp
+*/
+const PHONE = "5567992018672"; // seu número
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-  authDomain: "primezilla-70b94.firebaseapp.com",
-  projectId: "primezilla-70b94",
-  storageBucket: "primezilla-70b94.firebasestorage.app",
-  appId: "1:910803172382:web:db82186d77b8281f13020f"
-};
-
-const PHONE = "5567992018672";
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Função para evitar erro com HTML
 function esc(s){
-  return String(s || '').replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])
+  return String(s||'').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
   );
 }
 
 const grid = document.getElementById('productsGrid');
-const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+const catButtons = Array.from(document.querySelectorAll('.catBtn'));
+let produtos = [];
 
-onSnapshot(q, snap => {
-  const arr = [];
-  snap.forEach(d => arr.push(d.data()));
-  render(arr, 'all');
+// carrega JSON
+async function loadProdutos(){
+  grid.innerHTML = 'Carregando...';
+  try {
+    const res = await fetch('produtos.json?'+Date.now());
+    if(!res.ok) throw new Error('Erro ao buscar produtos.json: ' + res.status);
+    produtos = await res.json();
+    render('all');
+  } catch(err){
+    console.error(err);
+    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  }
+}
 
-  document.querySelectorAll('.catBtn').forEach(btn=>{
-    btn.onclick = () => render(arr, btn.dataset.cat);
-  });
-}, err => {
-  grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-  console.error(err);
-});
-
-function render(list, filter){
+// render com filtro
+function render(filter){
   grid.innerHTML = '';
-
+  const list = produtos || [];
   list.forEach(p => {
-    if(!p.active) return;
-    if(filter !== 'all' && p.category !== filter) return;
+    // mostrar: active !== false (ou seja, true ou undefined -> mostrar)
+    if(p.active === false) return;
+    if(filter !== 'all' && String(p.category||'').toLowerCase() !== filter) return;
 
     const img = p.imageUrl || p.image || 'placeholder.png';
-    const priceText = p.price
+    const priceText = (p.price !== null && p.price !== undefined)
       ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
       : 'Consultar valores';
 
     const el = document.createElement('div');
     el.className = 'card';
     el.innerHTML = `
-      <img src="${esc(img)}" alt="${esc(p.name)}">
-      <h3>${esc(p.name)}</h3>
-      <p class="price">${esc(priceText)}</p>
-      <a class="botao buy">Comprar</a>
+      <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
+      <div class="info">
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${esc(priceText)}</p>
+        <div class="controls">
+          <label>Qtd
+            <select class="qty"><option>1</option><option>2</option><option>3</option></select>
+          </label>
+          <label>${(p.type === 'pod') ? 'Sabor' : 'Cor'}
+            <select class="variant">${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}</select>
+          </label>
+          <label>Pagamento
+            <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
+          </label>
+          <button class="btnBuy botao">Comprar (WhatsApp)</button>
+        </div>
+      </div>
     `;
 
-    el.querySelector('.buy').addEventListener('click', () => {
+    el.querySelector('.btnBuy').addEventListener('click', ()=>{
+      const qtd = el.querySelector('.qty').value;
+      const variant = el.querySelector('.variant').value || '-';
+      const pay = el.querySelector('.pay').value;
       const variantLabel = (p.type === 'pod') ? 'Sabor' : 'Cor';
-      const variant = (p.options && p.options[0]) ? p.options[0] : '-';
-
+      const valorText = (p.price !== null && p.price !== undefined) ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
       const text = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}
-Quantidade: 1
-${variantLabel}: ${variant}
-Valor: ${priceText}
-Forma de Pagamento: PIX`
+        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`
       );
-
-      window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
+      window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
     });
 
     grid.appendChild(el);
   });
 
-  if(grid.children.length === 0){
+  if(!grid.children.length){
     grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
   }
 }
+
+// eventos dos botões
+catButtons.forEach(btn => {
+  btn.addEventListener('click', ()=>{
+    // destacar ativo visualmente (se quiser)
+    catButtons.forEach(b=>b.classList.remove('ativo-cat'));
+    btn.classList.add('ativo-cat');
+    render(btn.dataset.cat);
+  });
+});
+
+// inicial
+loadProdutos();
 </script>
+
+<style>
+/* estilos mínimos para cards (se faltar no seu style.css) */
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.card{background:#0b2230;border-radius:8px;padding:10px;color:#e6f7ff;display:flex;gap:10px;align-items:flex-start}
+.card .media img{width:100px;height:100px;object-fit:cover;border-radius:6px}
+.card .info h3{margin:0 0 6px 0}
+.price{font-weight:700;margin:6px 0}
+.botao{background:linear-gradient(90deg,#00d4ff,#007ac1);color:#001826;padding:8px;border-radius:6px;border:none;cursor:pointer}
+.ativo-cat{outline:2px solid rgba(0,212,255,0.12)}
+</style>
 
 </body>
 </html>
+
