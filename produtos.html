@@ -1,4 +1,4 @@
-<!doctype html>
+<<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -7,20 +7,24 @@
 <link rel="stylesheet" href="style.css">
 
 <style>
-/* ======== ESTILO GLOBAL (IGUAL DAS OUTRAS PÁGINAS) ======== */
+/* ======== ESTILO PADRÃO IGUAL TODAS AS ABAS ======== */
+
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: "Inter", sans-serif;
 }
+
 .container {
   padding: 20px;
   max-width: 1100px;
   margin: auto;
 }
+
 h2 {
   font-size: 26px;
   margin-bottom: 16px;
+  font-weight: 600;
 }
 
 /* ======== CATEGORIAS ======== */
@@ -30,26 +34,29 @@ h2 {
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
+
 .catBtn {
   background: #111;
   border: 1px solid #333;
   color: #ccc;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
   cursor: pointer;
   transition: .2s;
+  font-weight: 500;
 }
+
 .catBtn:hover,
 .catBtn.ativo-cat {
   background: #00d4ff;
-  border-color: #00d4ff;
   color: #000;
+  border-color: #00d4ff;
 }
 
-/* ======== GRID DE PRODUTOS ======== */
+/* ======== GRID ======== */
 .grid {
   display: grid;
-  gap: 20px;
+  gap: 22px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
@@ -58,9 +65,10 @@ h2 {
   background: #141414;
   border-radius: 14px;
   padding: 16px;
-  transition: .2s;
   border: 1px solid #1f1f1f;
+  transition: .2s;
 }
+
 .card:hover {
   transform: scale(1.02);
   border-color: #00d4ff;
@@ -70,56 +78,60 @@ h2 {
 .card .media img {
   width: 100%;
   height: 230px;
-  border-radius: 12px;
   object-fit: cover;
+  border-radius: 12px;
 }
 
-/* ======== INFORMAÇÕES ======== */
+/* ======== INFO ======== */
 .card .info h3 {
   margin: 10px 0 6px 0;
   font-size: 20px;
+  font-weight: 600;
 }
+
 .price {
-  font-weight: bold;
   color: #00d4ff;
-  margin-bottom: 12px;
+  font-weight: bold;
   font-size: 18px;
+  margin-bottom: 8px;
 }
 
 /* ======== CONTROLES ======== */
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
+
 label {
-  display: flex;
-  flex-direction: column;
   font-size: 14px;
   color: #ddd;
+  display: flex;
+  flex-direction: column;
 }
+
 select {
   background: #0d0d0d;
   border: 1px solid #333;
   color: #fff;
   padding: 8px;
-  margin-top: 4px;
   border-radius: 6px;
+  margin-top: 4px;
 }
 
-/* ======== BOTÃO (IGUAL CONTATO E ADMIN) ======== */
+/* ======== BOTÃO ======== */
 .botao {
   background: linear-gradient(90deg, #00d4ff, #007ac1);
   color: #000;
-  font-weight: bold;
-  padding: 12px;
-  border-radius: 8px;
   border: none;
+  padding: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  margin-top: 6px;
+  margin-top: 10px;
+  font-weight: bold;
   transition: .2s;
-  text-align: center;
 }
+
 .botao:hover {
   filter: brightness(1.2);
 }
@@ -129,8 +141,7 @@ select {
 
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago"
-         class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
   </div>
   <nav class="nav">
     <a href="index.html">Início</a>
@@ -159,16 +170,18 @@ select {
 </footer>
 
 <script>
-/* === SEU SCRIPT ORIGINAL (SEM ALTERAR LÓGICA) === */
 const PHONE = "5567992018672";
-function esc(s){
-  return String(s||'').replace(/[&<>"']/g, m =>
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, m =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
   );
 }
+
 const grid = document.getElementById('productsGrid');
 const catButtons = [...document.querySelectorAll('.catBtn')];
 let produtos = [];
+
 async function loadProdutos(){
   grid.innerHTML = 'Carregando...';
   try {
@@ -180,58 +193,73 @@ async function loadProdutos(){
     grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
   }
 }
+
 function render(filter){
   grid.innerHTML = "";
   produtos.forEach(p => {
-    if(p.active === false) return;
-    if(filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
+    if (p.active === false) return;
+    if (filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
+
     const img = p.imageUrl || p.image || "placeholder.png";
     const priceText = p.price !== undefined
       ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
       : "Consultar valores";
+
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `
       <div class="media"><img src="${esc(img)}"></div>
       <div class="info">
         <h3>${esc(p.name)}</h3>
         <p class="price">${esc(priceText)}</p>
+
         <div class="controls">
           <label>Quantidade
             <select class="qty">
               <option>1</option><option>2</option><option>3</option>
             </select>
           </label>
+
           <label>${p.type === "pod" ? "Sabor" : "Cor"}
             <select class="variant">
               ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
             </select>
           </label>
+
           <label>Pagamento
             <select class="pay">
               <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
             </select>
           </label>
+
           <button class="botao btnBuy">Comprar no WhatsApp</button>
         </div>
       </div>
     `;
+
     card.querySelector(".btnBuy").addEventListener("click", () => {
       const qtd = card.querySelector(".qty").value;
       const variant = card.querySelector(".variant").value;
       const pay = card.querySelector(".pay").value;
+
       const label = p.type === "pod" ? "Sabor" : "Cor";
+
       const message = encodeURIComponent(
         `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
       );
+
       window.open(`https://wa.me/${PHONE}?text=${message}`, "_blank");
     });
+
     grid.appendChild(card);
   });
-  if(!grid.children.length){
+
+  if (!grid.children.length){
     grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
   }
 }
+
 catButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     catButtons.forEach(b => b.classList.remove("ativo-cat"));
@@ -239,6 +267,7 @@ catButtons.forEach(btn => {
     render(btn.dataset.cat);
   });
 });
+
 loadProdutos();
 </script>
 
