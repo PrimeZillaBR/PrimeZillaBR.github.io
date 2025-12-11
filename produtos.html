@@ -1,115 +1,100 @@
-<<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Produtos — PrimeZilla</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Produtos — PrimeZilla</title>
+  <link rel="stylesheet" href="style.css">
 
 <style>
-/* ======== ESTILO PADRÃO IGUAL TODAS AS ABAS ======== */
-
+/* ======== ESTILO MODELO LIFEPOD (MESMO DO INDEX) ======== */
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
+/* TOPO */
+.topo {
+  background: #111;
+  border-bottom: 1px solid #222;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  height: 50px;
+}
+.nav a {
+  color: #ccc;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav a:hover,
+.nav .ativo {
+  color: #00d4ff;
+}
+
+/* CONTAINER */
 .container {
   padding: 20px;
   max-width: 1100px;
   margin: auto;
 }
-
 h2 {
   font-size: 26px;
-  margin-bottom: 16px;
-  font-weight: 600;
-}
-
-/* ======== CATEGORIAS ======== */
-.cats {
-  display: flex;
-  gap: 10px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
 }
 
-.catBtn {
-  background: #111;
-  border: 1px solid #333;
-  color: #ccc;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: .2s;
-  font-weight: 500;
-}
-
-.catBtn:hover,
-.catBtn.ativo-cat {
-  background: #00d4ff;
-  color: #000;
-  border-color: #00d4ff;
-}
-
-/* ======== GRID ======== */
+/* GRID */
 .grid {
   display: grid;
-  gap: 22px;
+  gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-/* ======== CARD ======== */
+/* CARD */
 .card {
   background: #141414;
   border-radius: 14px;
   padding: 16px;
-  border: 1px solid #1f1f1f;
   transition: .2s;
+  border: 1px solid #1f1f1f;
 }
-
 .card:hover {
   transform: scale(1.02);
   border-color: #00d4ff;
 }
-
-/* ======== IMAGEM ======== */
 .card .media img {
   width: 100%;
   height: 230px;
-  object-fit: cover;
   border-radius: 12px;
+  object-fit: cover;
 }
-
-/* ======== INFO ======== */
 .card .info h3 {
-  margin: 10px 0 6px 0;
+  margin: 10px 0 6px;
   font-size: 20px;
-  font-weight: 600;
 }
-
 .price {
   color: #00d4ff;
-  font-weight: bold;
   font-size: 18px;
-  margin-bottom: 8px;
+  font-weight: bold;
 }
 
-/* ======== CONTROLES ======== */
+/* CONTROLES */
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
-
 label {
   font-size: 14px;
   color: #ddd;
-  display: flex;
-  flex-direction: column;
 }
-
 select {
   background: #0d0d0d;
   border: 1px solid #333;
@@ -119,24 +104,32 @@ select {
   margin-top: 4px;
 }
 
-/* ======== BOTÃO ======== */
-.botao {
+/* BOTÃO */
+.btnBuy {
   background: linear-gradient(90deg, #00d4ff, #007ac1);
   color: #000;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-top: 10px;
   font-weight: bold;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
   transition: .2s;
 }
-
-.botao:hover {
+.btnBuy:hover {
   filter: brightness(1.2);
+}
+
+/* RODAPÉ */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  margin-top: 40px;
+  border-top: 1px solid #111;
 }
 </style>
 </head>
+
 <body>
 
 <header class="topo">
@@ -152,123 +145,95 @@ select {
 </header>
 
 <main class="container">
-  <h2>Produtos</h2>
-
-  <div class="cats">
-    <button class="catBtn ativo-cat" data-cat="all">Todos</button>
-    <button class="catBtn" data-cat="pods">Pods</button>
-    <button class="catBtn" data-cat="acessorios">Acessórios</button>
-    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
-    <button class="catBtn" data-cat="outros">Outros</button>
-  </div>
-
-  <div id="productsGrid" class="grid">Carregando...</div>
+  <section class="catalog">
+    <h2>Todos os Produtos</h2>
+    <div id="productsGrid" class="grid">Carregando produtos...</div>
+  </section>
 </main>
 
 <footer class="footer">
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
-<script>
-const PHONE = "5567992018672";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-function esc(s) {
-  return String(s || '').replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
-  );
-}
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
+    authDomain: "primezilla-70b94.firebaseapp.com",
+    projectId: "primezilla-70b94",
+    storageBucket: "primezilla-70b94.firebasestorage.app",
+    appId: "1:910803172382:web:db82186d77b8281f13020f"
+  };
 
-const grid = document.getElementById('productsGrid');
-const catButtons = [...document.querySelectorAll('.catBtn')];
-let produtos = [];
+  const PHONE = '5567992018672';
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-async function loadProdutos(){
-  grid.innerHTML = 'Carregando...';
-  try {
-    const res = await fetch('produtos.json?' + Date.now());
-    produtos = await res.json();
-    render('all');
-  } catch(e){
-    console.error(e);
-    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
-}
 
-function render(filter){
-  grid.innerHTML = "";
-  produtos.forEach(p => {
-    if (p.active === false) return;
-    if (filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const grid = document.getElementById('productsGrid');
+    const q = query(collection(db,'products'), orderBy('createdAt','desc'));
 
-    const img = p.imageUrl || p.image || "placeholder.png";
-    const priceText = p.price !== undefined
-      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
-      : "Consultar valores";
+    onSnapshot(q, snap => {
+      grid.innerHTML = '';
+      snap.forEach(doc => {
+        const p = doc.data();
+        if(!p.active) return;
 
-    const card = document.createElement("div");
-    card.className = "card";
+        const img = p.imageUrl || p.image || 'placeholder.png';
+        const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
 
-    card.innerHTML = `
-      <div class="media"><img src="${esc(img)}"></div>
-      <div class="info">
-        <h3>${esc(p.name)}</h3>
-        <p class="price">${esc(priceText)}</p>
+        const card = document.createElement('div');
+        card.className='card';
 
-        <div class="controls">
-          <label>Quantidade
-            <select class="qty">
-              <option>1</option><option>2</option><option>3</option>
-            </select>
-          </label>
+        card.innerHTML = `
+          <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
+          <div class="info">
+            <h3>${esc(p.name)}</h3>
+            <p class="price">${esc(priceText)}</p>
+            <div class="controls">
+              <label>Quantidade
+                <select class="qty"><option>1</option><option>2</option><option>3</option></select>
+              </label>
 
-          <label>${p.type === "pod" ? "Sabor" : "Cor"}
-            <select class="variant">
-              ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
-            </select>
-          </label>
+              <label>${p.type==='pod' ? 'Sabor' : 'Cor'}
+                <select class="variant">
+                  ${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}
+                </select>
+              </label>
 
-          <label>Pagamento
-            <select class="pay">
-              <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
-            </select>
-          </label>
+              <label>Pagamento
+                <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
+              </label>
 
-          <button class="botao btnBuy">Comprar no WhatsApp</button>
-        </div>
-      </div>
-    `;
+              <button class="btnBuy">Comprar (WhatsApp)</button>
+            </div>
+          </div>
+        `;
 
-    card.querySelector(".btnBuy").addEventListener("click", () => {
-      const qtd = card.querySelector(".qty").value;
-      const variant = card.querySelector(".variant").value;
-      const pay = card.querySelector(".pay").value;
+        card.querySelector('.btnBuy').addEventListener('click', ()=>{
+          const qtd = card.querySelector('.qty').value;
+          const variant = card.querySelector('.variant').value || '-';
+          const pay = card.querySelector('.pay').value;
+          const label = p.type==='pod' ? 'Sabor' : 'Cor';
 
-      const label = p.type === "pod" ? "Sabor" : "Cor";
+          const text = encodeURIComponent(
+            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+          );
+          window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank');
+        });
 
-      const message = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
-      );
+        grid.appendChild(card);
+      });
 
-      window.open(`https://wa.me/${PHONE}?text=${message}`, "_blank");
+      if(grid.innerHTML==='') grid.innerHTML = '<p>Nenhum produto disponível.</p>';
     });
-
-    grid.appendChild(card);
   });
-
-  if (!grid.children.length){
-    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
-  }
-}
-
-catButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    catButtons.forEach(b => b.classList.remove("ativo-cat"));
-    btn.classList.add("ativo-cat");
-    render(btn.dataset.cat);
-  });
-});
-
-loadProdutos();
 </script>
 
 </body>
