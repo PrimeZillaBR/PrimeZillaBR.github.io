@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrimeZilla</title>
+
+<style>
 /* =========================
    PRIMEZILLA - TEMA ESCURO
    ========================= */
@@ -23,33 +31,31 @@ html,body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ===== CABEÇALHO FIXO CORRIGIDO ===== */
+/* ===== CABEÇALHO FIXO ===== */
 .topo {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  
+
   background: #111;
-  padding: 35px 20px; /* altura automática */
-  
+  padding: 20px 25px;
+  height: 180px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  
-  border-bottom: 2px solid var(--accent);
 }
 
-/* ===== EVITA CORTE AUTOMATICAMENTE ===== */
+/* ===== CORRIGE O CORTE DO SITE ===== */
 body {
-  padding-top: 220px; 
-  /* Se ainda cortar, aumente aqui para 250px */
+  padding-top: 180px;
 }
 
+/* Logo */
 .logo{
-  height:60px;
+  height:44px;
 }
 
 /* container */
@@ -199,12 +205,62 @@ select:focus{
   margin-top:28px;
 }
 
-/* responsive tweaks */
+/* responsive */
 @media (max-width:640px){
   .card .media img{height:160px}
   .controls{gap:8px}
-  
-  body{
-    padding-top:260px; /* cabeçalho ocupa mais espaço no mobile */
-  }
 }
+</style>
+</head>
+
+<body>
+
+<!-- ===================== -->
+<!--       CABEÇALHO       -->
+<!-- ===================== -->
+<div class="topo">
+  <img src="sua-logo.png" alt="Logo" class="logo">
+
+  <nav>
+    <a href="#" style="color:white; margin-right:20px;">Início</a>
+    <a href="#" style="color:white; margin-right:20px;">Produtos</a>
+    <a href="#" style="color:white;">Contato</a>
+  </nav>
+</div>
+
+<!-- ===================== -->
+<!--     CONTEÚDO SITE     -->
+<!-- ===================== -->
+<div class="container">
+  <h1>Produtos</h1>
+
+  <div class="cats">
+    <button class="catBtn ativo-cat">Todos</button>
+    <button class="catBtn">Boosters</button>
+    <button class="catBtn">Skins</button>
+    <button class="catBtn">VIP</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="media">
+        <img src="img/produto1.jpg">
+      </div>
+      <div class="info">
+        <h3>Produto Exemplo</h3>
+        <div class="price">R$ 29,90</div>
+      </div>
+      <div class="controls">
+        <label>Tamanho:
+          <select><option>Padrão</option></select>
+        </label>
+      </div>
+      <button class="btnBuy">Comprar</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
