@@ -38,19 +38,17 @@ html,body{
   left: 0;
   width: 100%;
   z-index: 1000;
-
   background: #111;
-  padding: 20px 25px;
-  height: 180px;
-
+  padding: 20px 25px; /* 20 em cima + 20 embaixo */
+  height: 140px;      /* altura real do conteúdo */
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* ===== CORRIGE O CORTE DO SITE ===== */
+/* ===== EVITA O CORTE ===== */
 body {
-  padding-top: 180px;
+  padding-top: 180px; /* 140 (height) + 40 (padding total) */
 }
 
 /* Logo */
