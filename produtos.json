@@ -1,5 +1,19 @@
 [
   {
+    "name": "copo termico 1,2l",
+    "price": 120,
+    "currency": "R$",
+    "category": "acessorios",
+    "type": "non-pod",
+    "options": [
+      "rosa",
+      "preto",
+      "verde"
+    ],
+    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765415369/ttuhrqay9lfkjizoit7n.jpg",
+    "active": true
+  },
+  {
     "name": "ignite v50",
     "price": 70,
     "currency": "R$",
