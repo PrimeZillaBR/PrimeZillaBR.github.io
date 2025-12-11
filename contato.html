@@ -4,16 +4,62 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Contato — PrimeZilla</title>
-
-  <!-- Mesmo CSS das outras páginas -->
   <link rel="stylesheet" href="style.css">
+
+  <style>
+  /* ======== ESTILO IGUAL ABA PRODUTOS ======== */
+
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+  }
+  .container {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+  }
+  h2 {
+    font-size: 26px;
+    margin-bottom: 16px;
+  }
+
+  /* Botão estilo produtos */
+  .botao {
+    background: linear-gradient(90deg, #00d4ff, #007ac1);
+    color: #000;
+    font-weight: bold;
+    padding: 14px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: inline-block;
+    margin-top: 20px;
+    transition: .2s;
+    text-align: center;
+    text-decoration: none;
+  }
+  .botao:hover {
+    filter: brightness(1.2);
+  }
+
+  p {
+    font-size: 18px;
+    color: #ccc;
+  }
+
+  </style>
 </head>
 <body>
 
 <header class="topo">
-  <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago"
-       class="logo" alt="PrimeZilla">
-  <nav>
+  <div class="brand">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago"
+         class="logo" alt="PrimeZilla">
+  </div>
+
+  <nav class="nav">
     <a href="index.html">Início</a>
     <a href="produtos.html">Produtos</a>
     <a href="admin.html">Admin</a>
