@@ -22,14 +22,13 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   align-items:center;
   justify-content:space-between;
   padding:12px 20px;
-  background:#0a0f14; /* ou transparente, escolha */
+  background:#0a0f14;
   border-bottom:1px solid rgba(255,255,255,0.02);
-
-  position: fixed;   /* <- FIXA O CABEÇALHO */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 999;      /* fica por cima de tudo */
+  z-index: 999;
 }
 .logo{height:44px}
 
