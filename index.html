@@ -1,16 +1,16 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PrimeZilla — Eletrônicos & Variedades</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PrimeZilla — Início</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/ersuwnmpqepkaosb85gf" class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
   </div>
   <nav class="nav">
     <a href="index.html" class="ativo">Início</a>
@@ -23,118 +23,139 @@
 <section class="hero neon">
   <div class="hero-inner">
     <h1>PrimeZilla</h1>
-    <p>Eletrônicos & Variedades — entrega rápida em Jardim e Guia Lopes</p>
+    <p>Eletrônicos • Acessórios • Pods — entrega rápida em Jardim e Guia Lopes</p>
   </div>
 </section>
 
 <main class="container">
+
   <h2>Destaques</h2>
 
-  <!-- id igual ao da aba produtos para manter padronização -->
-  <div id="productsGrid" class="grid">Carregando produtos...</div>
+  <!-- mesmos filtros da aba Produtos -->
+  <div class="cats">
+    <button class="catBtn" data-cat="all">Todos</button>
+    <button class="catBtn" data-cat="pods">Pods</button>
+    <button class="catBtn" data-cat="acessorios">Acessórios</button>
+    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
+    <button class="catBtn" data-cat="outros">Outros</button>
+  </div>
+
+  <div id="productsGrid" class="grid">Carregando...</div>
+
 </main>
 
 <footer class="footer">
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
+<script>
+/* MESMO SCRIPT DA ABA PRODUTOS – 100% IGUAL */
 
-<!-- ============ FIREBASE LOAD E RENDER ============ -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+const PHONE = "5567992018672";
+function esc(s){
+  return String(s||'').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
+  );
+}
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-    authDomain: "primezilla-70b94.firebaseapp.com",
-    projectId: "primezilla-70b94",
-    storageBucket: "primezilla-70b94.firebasestorage.app",
-    appId: "1:910803172382:web:db82186d77b8281f13020f"
-  };
+const grid = document.getElementById('productsGrid');
+const catButtons = Array.from(document.querySelectorAll('.catBtn'));
+let produtos = [];
 
-  const PHONE = '5567992018672';  
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  function esc(s){ 
-    return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+// carregar produtos.json
+async function loadProdutos(){
+  grid.innerHTML = 'Carregando...';
+  try {
+    const res = await fetch('produtos.json?' + Date.now());
+    if(!res.ok) throw new Error('Erro ao buscar produtos.json: ' + res.status);
+    produtos = await res.json();
+    render('all');
+  } catch(err){
+    console.error(err);
+    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
   }
+}
 
-  const grid = document.getElementById('productsGrid');
+// renderizar cards
+function render(filter){
+  grid.innerHTML = '';
+  const list = produtos || [];
+  list.forEach(p => {
+    if(p.active === false) return;
+    if(filter !== 'all' && String(p.category||'').toLowerCase() !== filter) return;
 
-  document.addEventListener('DOMContentLoaded', ()=>{
+    const img = p.imageUrl || p.image || 'placeholder.png';
+    const priceText = (p.price !== null && p.price !== undefined)
+      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+      : 'Consultar valores';
 
-    const q = query(collection(db,'products'), orderBy('createdAt','desc'));
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `
+      <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
+      <div class="info">
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${esc(priceText)}</p>
+        <div class="controls">
+          <label>Qtd
+            <select class="qty"><option>1</option><option>2</option><option>3</option></select>
+          </label>
+          <label>${(p.type === 'pod') ? 'Sabor' : 'Cor'}
+            <select class="variant">${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}</select>
+          </label>
+          <label>Pagamento
+            <select class="pay"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
+          </label>
+          <button class="btnBuy botao">Comprar (WhatsApp)</button>
+        </div>
+      </div>
+    `;
 
-    onSnapshot(q, snap => {
-      grid.innerHTML = '';
+    el.querySelector('.btnBuy').addEventListener('click', ()=>{
+      const qtd = el.querySelector('.qty').value;
+      const variant = el.querySelector('.variant').value || '-';
+      const pay = el.querySelector('.pay').value;
+      const variantLabel = (p.type === 'pod') ? 'Sabor' : 'Cor';
+      const valorText = (p.price !== null && p.price !== undefined)
+        ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}`
+        : 'Consultar valores';
 
-      snap.forEach(doc => {
-        const p = doc.data();
-        if(!p.active) return;
+      const text = encodeURIComponent(
+        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${variantLabel}: ${variant}\nValor: ${valorText}\nForma de Pagamento: ${pay}`
+      );
 
-        const img = p.imageUrl || p.image || 'placeholder.png';
-        const priceText = p.price ? `${p.currency||'R$'} ${Number(p.price).toFixed(2)}` : 'Consultar valores';
-
-        const el = document.createElement('div');
-        el.className = 'card';
-        el.innerHTML = `
-          <div class="media">
-            <img src="${esc(img)}" alt="${esc(p.name)}">
-          </div>
-
-          <div class="info">
-            <h3>${esc(p.name)}</h3>
-            <p class="price">${esc(priceText)}</p>
-
-            <div class="controls">
-              <label>Qtd
-                <select class="qty"><option>1</option><option>2</option><option>3</option></select>
-              </label>
-
-              <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
-                <select class="variant">
-                  ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join('')}
-                </select>
-              </label>
-
-              <label>Pagamento
-                <select class="pay">
-                  <option>PIX</option>
-                  <option>Dinheiro</option>
-                  <option>Cartão</option>
-                </select>
-              </label>
-
-              <button class="btnBuy botao">Comprar (WhatsApp)</button>
-            </div>
-          </div>
-        `;
-
-        el.querySelector('.btnBuy').addEventListener('click', () => {
-          const qtd = el.querySelector('.qty').value;
-          const variant = el.querySelector('.variant').value;
-          const pay = el.querySelector('.pay').value;
-          const label = p.type === "pod" ? "Sabor" : "Cor";
-
-          const text = encodeURIComponent(
-            `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPreço: ${priceText}\nPagamento: ${pay}`
-          );
-
-          window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
-        });
-
-        grid.appendChild(el);
-      });
-
-      if(!grid.innerHTML.trim()){
-        grid.innerHTML = '<p>Nenhum produto disponível.</p>';
-      }
+      window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
     });
 
+    grid.appendChild(el);
   });
+
+  if(!grid.children.length){
+    grid.innerHTML = '<p>Nenhum item nesta categoria.</p>';
+  }
+}
+
+// eventos dos filtros
+catButtons.forEach(btn => {
+  btn.addEventListener('click', ()=>{
+    catButtons.forEach(b=>b.classList.remove('ativo-cat'));
+    btn.classList.add('ativo-cat');
+    render(btn.dataset.cat);
+  });
+});
+
+// inicial
+loadProdutos();
 </script>
+
+<style>
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.card{background:#0b2230;border-radius:8px;padding:10px;color:#e6f7ff;display:flex;gap:10px;align-items:flex-start}
+.card .media img{width:100px;height:100px;object-fit:cover;border-radius:6px}
+.price{font-weight:700;margin:6px 0}
+.botao{background:linear-gradient(90deg,#00d4ff,#007ac1);color:#001826;padding:8px;border-radius:6px;border:none;cursor:pointer}
+.ativo-cat{outline:2px solid rgba(0,212,255,0.12)}
+</style>
 
 </body>
 </html>
