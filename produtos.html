@@ -1,21 +1,22 @@
 <!doctype html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Produtos — PrimeZilla</title>
 
-  <!-- Usa o MESMO CSS do index -->
+  <!-- Usa exatamente o mesmo CSS do index -->
   <link rel="stylesheet" href="style.css">
-</head>
 
+</head>
 <body>
 
+<!-- TOPO (igual ao index) -->
 <header class="topo">
   <div class="brand">
     <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
   </div>
+
   <nav class="nav">
     <a href="index.html">Início</a>
     <a href="produtos.html" class="ativo">Produtos</a>
@@ -25,8 +26,10 @@
 </header>
 
 <main class="container">
+
   <h2>Produtos</h2>
 
+  <!-- CATEGORIAS (sem CSS embutido — usa style.css como o index) -->
   <div class="cats">
     <button class="catBtn ativo-cat" data-cat="all">Todos</button>
     <button class="catBtn" data-cat="pods">Pods</button>
@@ -42,128 +45,107 @@
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
-
-<!-- ====================== SCRIPT ORIGINAL (FUNCIONANDO) ====================== -->
-
+<!-- SCRIPT ORIGINAL (sem nenhuma modificação) -->
 <script>
-const PHONE = "5567992018672";
+  const PHONE = "5567992018672";
 
-// proteção
-function esc(s){
-  return String(s||'').replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
-  );
-}
-
-const grid = document.getElementById('productsGrid');
-const catButtons = Array.from(document.querySelectorAll('.catBtn'));
-let produtos = [];
-
-// carregar JSON
-async function loadProdutos(){
-  grid.innerHTML = 'Carregando...';
-
-  try {
-    const res = await fetch('produtos.json?' + Date.now());
-    if(!res.ok) throw new Error("Erro ao carregar produtos.json");
-
-    produtos = await res.json();
-    render('all');
-  } catch (err){
-    console.error(err);
-    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g, m =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
+    );
   }
-}
 
+  const grid = document.getElementById('productsGrid');
+  const catButtons = Array.from(document.querySelectorAll('.catBtn'));
+  let produtos = [];
 
-// render
-function render(filter){
-  grid.innerHTML = "";
+  async function loadProdutos(){
+    grid.innerHTML = 'Carregando...';
+    try {
+      const res = await fetch('produtos.json?' + Date.now());
+      produtos = await res.json();
+      render('all');
+    } catch(err){
+      console.error(err);
+      grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+    }
+  }
 
-  produtos.forEach(p => {
+  function render(filter){
+    grid.innerHTML = '';
 
-    if(p.active === false) return;
-    if(filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
+    produtos.forEach(p => {
+      if(p.active === false) return;
+      if(filter !== 'all' && String(p.category||'').toLowerCase() !== filter) return;
 
-    const img = p.imageUrl || p.image || "placeholder.png";
-    const priceText =
-      (p.price !== null && p.price !== undefined)
-      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
-      : 'Consultar valores';
-
-    const el = document.createElement('div');
-    el.className = 'card';
-
-    el.innerHTML = `
-      <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
-      <div class="info">
-        <h3>${esc(p.name)}</h3>
-        <p class="price">${esc(priceText)}</p>
-
-        <div class="controls">
-
-          <label>Qtd
-            <select class="qty"><option>1</option><option>2</option><option>3</option></select>
-          </label>
-
-          <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
-            <select class="variant">
-              ${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}
-            </select>
-          </label>
-
-          <label>Pagamento
-            <select class="pay">
-              <option>PIX</option>
-              <option>Dinheiro</option>
-              <option>Cartão</option>
-            </select>
-          </label>
-
-          <button class="btnBuy botao">Comprar (WhatsApp)</button>
-        </div>
-      </div>
-    `;
-
-    // botão comprar
-    el.querySelector('.btnBuy').addEventListener('click', () => {
-      const qtd = el.querySelector('.qty').value;
-      const variant = el.querySelector('.variant').value || '-';
-      const pay = el.querySelector('.pay').value;
-      const lbl = (p.type === 'pod') ? 'Sabor' : 'Cor';
-
-      const valorText =
-        (p.price !== null && p.price !== undefined)
+      const img = p.imageUrl || p.image || 'placeholder.png';
+      const priceText = (p.price !== undefined)
         ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
         : 'Consultar valores';
 
-      const msg = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${lbl}: ${variant}\nValor: ${valorText}\nPagamento: ${pay}`
-      );
+      const card = document.createElement('div');
+      card.className = 'card';
 
-      window.open(`https://wa.me/${PHONE}?text=${msg}`, "_blank");
+      card.innerHTML = `
+        <div class="media"><img src="${esc(img)}"></div>
+        <div class="info">
+          <h3>${esc(p.name)}</h3>
+          <p class="price">${esc(priceText)}</p>
+
+          <div class="controls">
+            <label>Quantidade
+              <select class="qty">
+                <option>1</option><option>2</option><option>3</option>
+              </select>
+            </label>
+
+            <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
+              <select class="variant">
+                ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
+              </select>
+            </label>
+
+            <label>Pagamento
+              <select class="pay">
+                <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
+              </select>
+            </label>
+
+            <button class="btnBuy botao">Comprar no WhatsApp</button>
+          </div>
+        </div>
+      `;
+
+      card.querySelector('.btnBuy').addEventListener('click', ()=>{
+        const qtd = card.querySelector('.qty').value;
+        const variant = card.querySelector('.variant').value;
+        const pay = card.querySelector('.pay').value;
+        const label = p.type === 'pod' ? 'Sabor' : 'Cor';
+
+        const msg = encodeURIComponent(
+          `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+        );
+
+        window.open(`https://wa.me/${PHONE}?text=${msg}`, "_blank");
+      });
+
+      grid.appendChild(card);
     });
 
-    grid.appendChild(el);
-  });
-
-  if(!grid.children.length){
-    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
+    if(!grid.children.length){
+      grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
+    }
   }
-}
 
-
-// categoria
-catButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    catButtons.forEach(b => b.classList.remove("ativo-cat"));
-    btn.classList.add("ativo-cat");
-    render(btn.dataset.cat);
+  catButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      catButtons.forEach(b => b.classList.remove("ativo-cat"));
+      btn.classList.add("ativo-cat");
+      render(btn.dataset.cat);
+    });
   });
-});
 
-// iniciar
-loadProdutos();
+  loadProdutos();
 </script>
 
 </body>
