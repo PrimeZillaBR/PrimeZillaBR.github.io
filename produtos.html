@@ -1,160 +1,24 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Produtos — PrimeZilla</title>
+
+  <!-- Usa o MESMO CSS do index -->
   <link rel="stylesheet" href="style.css">
-
-<style>
-/* ======== ESTILO MODELO LIFEPOD ======== */
-body {
-  background: #0a0a0a;
-  color: #fff;
-  font-family: "Inter", sans-serif;
-}
-.topo {
-  background: #111;
-  border-bottom: 1px solid #222;
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.logo {
-  height: 50px;
-}
-.nav a {
-  color: #ccc;
-  margin-left: 20px;
-  text-decoration: none;
-  font-weight: 500;
-}
-.nav .ativo,
-.nav a:hover {
-  color: #00d4ff;
-}
-
-.container {
-  padding: 20px;
-  max-width: 1100px;
-  margin: auto;
-}
-h2 {
-  font-size: 26px;
-  margin-bottom: 20px;
-}
-
-/* CATEGORIAS */
-.cats {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-.catBtn {
-  background: #111;
-  border: 1px solid #333;
-  color: #ccc;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: .2s;
-}
-.catBtn:hover,
-.catBtn.ativo-cat {
-  background: #00d4ff;
-  color: #000;
-  border-color: #00d4ff;
-}
-
-/* GRID */
-.grid {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-
-/* CARD */
-.card {
-  background: #141414;
-  border-radius: 14px;
-  padding: 16px;
-  transition: .2s;
-  border: 1px solid #1f1f1f;
-}
-.card:hover {
-  transform: scale(1.02);
-  border-color: #00d4ff;
-}
-.card .media img {
-  width: 100%;
-  height: 230px;
-  border-radius: 12px;
-  object-fit: cover;
-}
-.card .info h3 {
-  font-size: 20px;
-  margin: 10px 0 6px;
-}
-.price {
-  color: #00d4ff;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-/* CONTROLES */
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-label {
-  font-size: 14px;
-  color: #ddd;
-}
-select {
-  background: #0d0d0d;
-  border: 1px solid #333;
-  color: #fff;
-  padding: 8px;
-  border-radius: 6px;
-}
-
-/* BOTÃO */
-.btnBuy {
-  background: linear-gradient(90deg, #00d4ff, #007ac1);
-  color: #000;
-  font-weight: bold;
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-.btnBuy:hover {
-  filter: brightness(1.2);
-}
-
-.footer {
-  text-align: center;
-  padding: 20px;
-  color: #777;
-  border-top: 1px solid #111;
-  margin-top: 40px;
-}
-</style>
 </head>
 
 <body>
 
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
   </div>
   <nav class="nav">
     <a href="index.html">Início</a>
-    <a class="ativo" href="produtos.html">Produtos</a>
+    <a href="produtos.html" class="ativo">Produtos</a>
     <a href="admin.html">Admin</a>
     <a href="contato.html">Contato</a>
   </nav>
@@ -178,81 +42,73 @@ select {
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDlzVS8ZkI4bVAmcFyKH1PDojvTXGYXyso",
-  authDomain: "primezilla-70b94.firebaseapp.com",
-  projectId: "primezilla-70b94",
-  storageBucket: "primezilla-70b94.firebasestorage.app",
-  appId: "1:910803172382:web:db82186d77b8281f13020f"
-};
+<!-- ====================== SCRIPT ORIGINAL (FUNCIONANDO) ====================== -->
 
+<script>
 const PHONE = "5567992018672";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* === FUNÇÃO DE ESCAPAR === */
+// proteção
 function esc(s){
-  return String(s||'').replace(/[&<>"']/g,
-    m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+  return String(s||'').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
   );
 }
 
-const grid = document.getElementById("productsGrid");
-const catBtns = [...document.querySelectorAll(".catBtn")];
+const grid = document.getElementById('productsGrid');
+const catButtons = Array.from(document.querySelectorAll('.catBtn'));
 let produtos = [];
-let categoriaAtual = "all";
 
-catBtns.forEach(btn => {
-  btn.onclick = () => {
-    catBtns.forEach(b => b.classList.remove("ativo-cat"));
-    btn.classList.add("ativo-cat");
-    categoriaAtual = btn.dataset.cat;
-    render();
-  };
-});
+// carregar JSON
+async function loadProdutos(){
+  grid.innerHTML = 'Carregando...';
 
-const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-onSnapshot(q, snap => {
-  produtos = [];
-  snap.forEach(doc => produtos.push({ id: doc.id, ...doc.data() }));
-  render();
-});
+  try {
+    const res = await fetch('produtos.json?' + Date.now());
+    if(!res.ok) throw new Error("Erro ao carregar produtos.json");
 
-function render(){
+    produtos = await res.json();
+    render('all');
+  } catch (err){
+    console.error(err);
+    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  }
+}
+
+
+// render
+function render(filter){
   grid.innerHTML = "";
 
   produtos.forEach(p => {
-    if(!p.active) return;
 
-    const cat = (p.category || "").toLowerCase();
-    if(categoriaAtual !== "all" && cat !== categoriaAtual) return;
+    if(p.active === false) return;
+    if(filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
 
     const img = p.imageUrl || p.image || "placeholder.png";
-    const priceText = p.price ? `${p.currency || "R$"} ${Number(p.price).toFixed(2)}` : "Consultar valores";
+    const priceText =
+      (p.price !== null && p.price !== undefined)
+      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+      : 'Consultar valores';
 
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="media"><img src="${esc(img)}"></div>
+    const el = document.createElement('div');
+    el.className = 'card';
+
+    el.innerHTML = `
+      <div class="media"><img src="${esc(img)}" alt="${esc(p.name)}"></div>
       <div class="info">
         <h3>${esc(p.name)}</h3>
         <p class="price">${esc(priceText)}</p>
 
         <div class="controls">
-          <label>Quantidade
-            <select class="qty">
-              <option>1</option><option>2</option><option>3</option>
-            </select>
+
+          <label>Qtd
+            <select class="qty"><option>1</option><option>2</option><option>3</option></select>
           </label>
 
-          <label>${p.type === "pod" ? "Sabor" : "Cor"}
+          <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
             <select class="variant">
-              ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
+              ${(p.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}
             </select>
           </label>
 
@@ -264,31 +120,50 @@ function render(){
             </select>
           </label>
 
-          <button class="btnBuy">Comprar no WhatsApp</button>
+          <button class="btnBuy botao">Comprar (WhatsApp)</button>
         </div>
       </div>
     `;
 
-    card.querySelector(".btnBuy").onclick = () => {
-      const qtd = card.querySelector(".qty").value;
-      const variant = card.querySelector(".variant").value;
-      const pay = card.querySelector(".pay").value;
-      const label = p.type === "pod" ? "Sabor" : "Cor";
+    // botão comprar
+    el.querySelector('.btnBuy').addEventListener('click', () => {
+      const qtd = el.querySelector('.qty').value;
+      const variant = el.querySelector('.variant').value || '-';
+      const pay = el.querySelector('.pay').value;
+      const lbl = (p.type === 'pod') ? 'Sabor' : 'Cor';
 
-      const text = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+      const valorText =
+        (p.price !== null && p.price !== undefined)
+        ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+        : 'Consultar valores';
+
+      const msg = encodeURIComponent(
+        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${lbl}: ${variant}\nValor: ${valorText}\nPagamento: ${pay}`
       );
 
-      window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank");
-    };
+      window.open(`https://wa.me/${PHONE}?text=${msg}`, "_blank");
+    });
 
-    grid.appendChild(card);
+    grid.appendChild(el);
   });
 
-  if(grid.children.length === 0){
+  if(!grid.children.length){
     grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
   }
 }
+
+
+// categoria
+catButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    catButtons.forEach(b => b.classList.remove("ativo-cat"));
+    btn.classList.add("ativo-cat");
+    render(btn.dataset.cat);
+  });
+});
+
+// iniciar
+loadProdutos();
 </script>
 
 </body>
