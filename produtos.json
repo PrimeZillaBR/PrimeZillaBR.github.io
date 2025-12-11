@@ -12,19 +12,5 @@
     ],
     "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765435144/d5ntncqfnnczo4qmoxu3.jpg",
     "active": true
-  },
-  {
-    "name": "copo termico 1,2l",
-    "price": 120,
-    "currency": "R$",
-    "category": "pods",
-    "type": "pod",
-    "options": [
-      "rosa",
-      "preto",
-      "verde"
-    ],
-    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765421200/wzidpzagbed0qusg995w.jpg",
-    "active": true
   }
 ]
