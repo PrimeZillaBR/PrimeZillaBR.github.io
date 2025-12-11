@@ -11,11 +11,9 @@
   --border:rgba(0,212,255,0.06);
   --panel:#0f1720;
 }
-
 *{
   box-sizing:border-box;
 }
-
 html,body{
   height:100%;
   margin:0;
@@ -25,20 +23,35 @@ html,body{
   -webkit-font-smoothing:antialiased;
 }
 
+/* =========================
+      CABEÇALHO FIXO
+========================= */
 .topo {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-}
-body {
-  margin: 0;
-  padding-top: 0; /* vai ser ajustado automaticamente */
+
+  background: #111;
+  padding: 25px 20px;
+
+  /* Altura REAL do cabeçalho */
+  min-height: 180px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* IMPORTANTE: evita cortar no mobile */
 }
 
-.logo{
-  height:44px;
+/* COMPENSAÇÃO DO CABEÇALHO */
+body {
+  padding-top: 190px; /* 10px extra evita corte em qualquer layout */
+}
+
+.logo {
+  height: 60px;
 }
 
 /* container */
@@ -53,7 +66,6 @@ h1,h2{
   margin:0;
   color:var(--text);
 }
-
 h2{
   font-size:22px;
   margin-bottom:12px;
@@ -66,7 +78,6 @@ h2{
   flex-wrap:wrap;
   margin-bottom:18px;
 }
-
 .catBtn{
   background:var(--panel);
   border:1px solid var(--border);
@@ -76,11 +87,9 @@ h2{
   cursor:pointer;
   transition:all .12s;
 }
-
 .catBtn:hover{
   transform:translateY(-2px);
 }
-
 .catBtn.ativo-cat{
   background:var(--accent);
   color:#001826;
@@ -105,7 +114,6 @@ h2{
   gap:12px;
   transition:transform .12s, box-shadow .12s;
 }
-
 .card:hover{
   transform:translateY(-6px);
   box-shadow:0 10px 30px rgba(0,0,0,0.45);
@@ -125,7 +133,6 @@ h2{
   margin:0;
   font-size:18px;
 }
-
 .price{
   font-weight:700;
   color:var(--accent);
@@ -139,7 +146,6 @@ h2{
   gap:10px;
   margin-top:6px;
 }
-
 label{
   font-size:13px;
   color:var(--muted);
@@ -147,7 +153,6 @@ label{
   flex-direction:column;
   gap:6px;
 }
-
 select{
   padding:9px;
   border-radius:8px;
@@ -156,7 +161,6 @@ select{
   color:var(--text);
   outline:none;
 }
-
 select:focus{
   box-shadow:0 0 0 3px rgba(0,212,255,0.06);
   border-color:var(--accent);
@@ -174,7 +178,6 @@ select:focus{
   font-weight:700;
   text-align:center;
 }
-
 .botao:hover, .btnBuy:hover{
   filter:brightness(1.06);
 }
@@ -187,12 +190,10 @@ select:focus{
   border:1px solid rgba(255,255,255,0.01);
   color:var(--muted);
 }
-
 .small{
   font-size:13px;
   color:var(--muted);
 }
-
 .footer{
   padding:20px;
   text-align:center;
@@ -200,8 +201,26 @@ select:focus{
   margin-top:28px;
 }
 
-/* responsive tweaks */
+/* =========================
+     RESPONSIVO (MOBILE)
+========================= */
 @media (max-width:640px){
-  .card .media img{height:160px}
-  .controls{gap:8px}
+  body{
+    padding-top: 220px; /* Header maior no mobile */
+  }
+
+  .topo{
+    min-height: 200px;
+    padding: 30px 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .logo{
+    height: 70px;
+  }
+
+  .card .media img{
+    height:160px;
+  }
 }
