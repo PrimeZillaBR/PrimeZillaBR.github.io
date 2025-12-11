@@ -1,120 +1,274 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Contato — PrimeZilla</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Produtos — PrimeZilla</title>
+<link rel="stylesheet" href="style.css">
 
-  <style>
-  /* ======== ESTILO IGUAL INDEX ======== */
-  body {
-    background: #0a0a0a;
-    color: #fff;
-    font-family: "Inter", sans-serif;
-    margin: 0;
-    padding: 0;
-  }
+<style>
+/* ======== ESTILO MODELO LIFEPOD (MESMO DO INDEX) ======== */
+body {
+  background: #0a0a0a;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
-  /* topo igual index */
-  .topo {
-    background: #111;
-    border-bottom: 1px solid #222;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .logo {
-    height: 50px;
-  }
-  .nav a {
-    color: #ccc;
-    margin-left: 20px;
-    text-decoration: none;
-    font-weight: 500;
-  }
-  .nav a:hover,
-  .nav .ativo {
-    color: #00d4ff;
-  }
+/* TOPO */
+.topo {
+  background: #111;
+  border-bottom: 1px solid #222;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  height: 50px;
+}
+.nav a {
+  color: #ccc;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav a:hover,
+.nav .ativo {
+  color: #00d4ff;
+}
 
-  /* container igual index */
-  .container {
-    padding: 20px;
-    max-width: 1100px;
-    margin: auto;
-  }
+/* CONTAINER */
+.container {
+  padding: 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+h2 {
+  font-size: 26px;
+  margin-bottom: 16px;
+}
 
-  h2 {
-    font-size: 26px;
-    margin-bottom: 20px;
-  }
+/* CATEGORIAS */
+.cats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.catBtn {
+  background: #111;
+  border: 1px solid #333;
+  color: #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: .2s;
+}
+.catBtn:hover,
+.catBtn.ativo-cat {
+  background: #00d4ff;
+  border-color: #00d4ff;
+  color: #000;
+}
 
-  p {
-    color: #ccc;
-    font-size: 18px;
-  }
+/* GRADE */
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
 
-  /* botão igual index (btnBuy → botao) */
-  .botao {
-    background: linear-gradient(90deg, #00d4ff, #007ac1);
-    color: #000;
-    font-weight: bold;
-    padding: 14px 22px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    display: inline-block;
-    margin-top: 20px;
-    transition: .2s;
-    text-decoration: none;
-    text-align: center;
-  }
-  .botao:hover {
-    filter: brightness(1.2);
-  }
+/* CARD — MESMO DO INDEX */
+.card {
+  background: #141414;
+  border-radius: 14px;
+  padding: 16px;
+  transition: .2s;
+  border: 1px solid #1f1f1f;
+}
+.card:hover {
+  transform: scale(1.02);
+  border-color: #00d4ff;
+}
+.card .media img {
+  width: 100%;
+  height: 230px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.card .info h3 {
+  margin: 10px 0 6px;
+  font-size: 20px;
+}
+.price {
+  color: #00d4ff;
+  font-size: 18px;
+  font-weight: bold;
+}
 
-  /* rodapé igual index */
-  .footer {
-    text-align: center;
-    padding: 20px;
-    color: #777;
-    margin-top: 40px;
-    border-top: 1px solid #111;
-  }
-  </style>
+/* CONTROLES */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+label {
+  font-size: 14px;
+  color: #ddd;
+}
+select {
+  background: #0d0d0d;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* BOTÃO — MESMO DO INDEX */
+.botao,
+.btnBuy {
+  background: linear-gradient(90deg, #00d4ff, #007ac1);
+  color: #000;
+  font-weight: bold;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: .2s;
+}
+.botao:hover,
+.btnBuy:hover {
+  filter: brightness(1.2);
+}
+
+/* RODAPÉ */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  margin-top: 40px;
+  border-top: 1px solid #111;
+}
+</style>
 </head>
 
 <body>
-
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago"
-         class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
   </div>
-
   <nav class="nav">
     <a href="index.html">Início</a>
-    <a href="produtos.html">Produtos</a>
+    <a href="produtos.html" class="ativo">Produtos</a>
     <a href="admin.html">Admin</a>
-    <a href="contato.html" class="ativo">Contato</a>
+    <a href="contato.html">Contato</a>
   </nav>
 </header>
 
 <main class="container">
-  <h2>Contato</h2>
-  <p>Fale com nossa equipe pelo WhatsApp 👇</p>
+  <h2>Produtos</h2>
 
-  <a class="botao" href="https://wa.me/5567992018672" target="_blank">
-    Chamar no WhatsApp
-  </a>
+  <div class="cats">
+    <button class="catBtn ativo-cat" data-cat="all">Todos</button>
+    <button class="catBtn" data-cat="pods">Pods</button>
+    <button class="catBtn" data-cat="acessorios">Acessórios</button>
+    <button class="catBtn" data-cat="eletronicos">Eletrônicos</button>
+    <button class="catBtn" data-cat="outros">Outros</button>
+  </div>
+
+  <div id="productsGrid" class="grid">Carregando...</div>
 </main>
 
 <footer class="footer">
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
+
+<script>
+/* === SEU SCRIPT ORIGINAL (SEM ALTERAR NADA) === */
+const PHONE = "5567992018672";
+function esc(s){
+  return String(s||'').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
+  );
+}
+const grid = document.getElementById('productsGrid');
+const catButtons = [...document.querySelectorAll('.catBtn')];
+let produtos = [];
+async function loadProdutos(){
+  grid.innerHTML = 'Carregando...';
+  try {
+    const res = await fetch('produtos.json?' + Date.now());
+    produtos = await res.json();
+    render('all');
+  } catch(e){
+    console.error(e);
+    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
+  }
+}
+function render(filter){
+  grid.innerHTML = "";
+  produtos.forEach(p => {
+    if(p.active === false) return;
+    if(filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
+    const img = p.imageUrl || p.image || "placeholder.png";
+    const priceText = p.price !== undefined
+      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+      : "Consultar valores";
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="media"><img src="${esc(img)}"></div>
+      <div class="info">
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${esc(priceText)}</p>
+        <div class="controls">
+          <label>Quantidade
+            <select class="qty">
+              <option>1</option><option>2</option><option>3</option>
+            </select>
+          </label>
+          <label>${p.type === "pod" ? "Sabor" : "Cor"}
+            <select class="variant">
+              ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
+            </select>
+          </label>
+          <label>Pagamento
+            <select class="pay">
+              <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
+            </select>
+          </label>
+          <button class="btnBuy">Comprar no WhatsApp</button>
+        </div>
+      </div>
+    `;
+    card.querySelector(".btnBuy").addEventListener("click", () => {
+      const qtd = card.querySelector(".qty").value;
+      const variant = card.querySelector(".variant").value;
+      const pay = card.querySelector(".pay").value;
+      const label = p.type === "pod" ? "Sabor" : "Cor";
+      const message = encodeURIComponent(
+        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+      );
+      window.open(`https://wa.me/${PHONE}?text=${message}`, "_blank");
+    });
+    grid.appendChild(card);
+  });
+  if(!grid.children.length){
+    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
+  }
+}
+catButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    catButtons.forEach(b => b.classList.remove("ativo-cat"));
+    btn.classList.add("ativo-cat");
+    render(btn.dataset.cat);
+  });
+});
+loadProdutos();
+</script>
 
 </body>
 </html>
