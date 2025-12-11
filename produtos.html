@@ -4,17 +4,170 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Produtos — PrimeZilla</title>
-
-  <!-- Usa exatamente o mesmo CSS do index -->
   <link rel="stylesheet" href="style.css">
 
+  <style>
+    /* ======== ESTILO DO INDEX ======== */
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: "Inter", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .topo {
+      background: #111;
+      border-bottom: 1px solid #222;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      height: 50px;
+    }
+
+    .nav a {
+      color: #ccc;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav a:hover,
+    .nav .ativo {
+      color: #00d4ff;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    /* Categorias */
+    .cats {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .catBtn {
+      background: #111;
+      border: 1px solid #333;
+      color: #ccc;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .catBtn:hover,
+    .catBtn.ativo-cat {
+      background: #00d4ff;
+      border-color: #00d4ff;
+      color: #000;
+    }
+
+    /* Cards igual ao index */
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .card {
+      background: #141414;
+      border-radius: 14px;
+      padding: 16px;
+      transition: .2s;
+      border: 1px solid #1f1f1f;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+      border-color: #00d4ff;
+    }
+
+    .media img {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .info h3 {
+      margin: 10px 0 6px;
+      font-size: 20px;
+    }
+
+    .price {
+      color: #00d4ff;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    select {
+      background: #0d0d0d;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 4px;
+    }
+
+    .botao {
+      background: linear-gradient(90deg, #00d4ff, #007ac1);
+      color: #000;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .botao:hover {
+      filter: brightness(1.2);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #777;
+      margin-top: 40px;
+      border-top: 1px solid #111;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- TOPO (igual ao index) -->
 <header class="topo">
   <div class="brand">
-    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo" alt="PrimeZilla">
+    <img src="https://res.cloudinary.com/duwsueept/image/upload/jq5bm4gwdwi3kpxgrago" class="logo">
   </div>
 
   <nav class="nav">
@@ -29,7 +182,6 @@
 
   <h2>Produtos</h2>
 
-  <!-- CATEGORIAS (sem CSS embutido — usa style.css como o index) -->
   <div class="cats">
     <button class="catBtn ativo-cat" data-cat="all">Todos</button>
     <button class="catBtn" data-cat="pods">Pods</button>
@@ -39,113 +191,112 @@
   </div>
 
   <div id="productsGrid" class="grid">Carregando...</div>
+
 </main>
 
 <footer class="footer">
   © 2025 PrimeZilla — SITE CRIADO POR @JHON_LORRAN_
 </footer>
 
-<!-- SCRIPT ORIGINAL (sem nenhuma modificação) -->
 <script>
-  const PHONE = "5567992018672";
+/* === SCRIPT ORIGINAL — SEM ALTERAR LÓGICA === */
+const PHONE = "5567992018672";
 
-  function esc(s){
-    return String(s||'').replace(/[&<>"']/g, m =>
-      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
-    );
+function esc(s){
+  return String(s||'').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])
+  );
+}
+
+const grid = document.getElementById('productsGrid');
+const catButtons = [...document.querySelectorAll('.catBtn')];
+let produtos = [];
+
+async function loadProdutos(){
+  grid.innerHTML = 'Carregando...';
+
+  try {
+    const res = await fetch('produtos.json?' + Date.now());
+    produtos = await res.json();
+    render('all');
+  } catch(e){
+    console.error(e);
+    grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
   }
+}
 
-  const grid = document.getElementById('productsGrid');
-  const catButtons = Array.from(document.querySelectorAll('.catBtn'));
-  let produtos = [];
+function render(filter){
+  grid.innerHTML = "";
 
-  async function loadProdutos(){
-    grid.innerHTML = 'Carregando...';
-    try {
-      const res = await fetch('produtos.json?' + Date.now());
-      produtos = await res.json();
-      render('all');
-    } catch(err){
-      console.error(err);
-      grid.innerHTML = '<p>Erro ao carregar produtos.</p>';
-    }
-  }
+  produtos.forEach(p => {
+    if(p.active === false) return;
+    if(filter !== "all" && String(p.category||"").toLowerCase() !== filter) return;
 
-  function render(filter){
-    grid.innerHTML = '';
+    const img = p.imageUrl || p.image || "placeholder.png";
 
-    produtos.forEach(p => {
-      if(p.active === false) return;
-      if(filter !== 'all' && String(p.category||'').toLowerCase() !== filter) return;
+    const priceText = p.price !== undefined
+      ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
+      : "Consultar valores";
 
-      const img = p.imageUrl || p.image || 'placeholder.png';
-      const priceText = (p.price !== undefined)
-        ? `${p.currency || 'R$'} ${Number(p.price).toFixed(2)}`
-        : 'Consultar valores';
+    const card = document.createElement("div");
+    card.className = "card";
 
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      card.innerHTML = `
-        <div class="media"><img src="${esc(img)}"></div>
-        <div class="info">
-          <h3>${esc(p.name)}</h3>
-          <p class="price">${esc(priceText)}</p>
-
-          <div class="controls">
-            <label>Quantidade
-              <select class="qty">
-                <option>1</option><option>2</option><option>3</option>
-              </select>
-            </label>
-
-            <label>${p.type === 'pod' ? 'Sabor' : 'Cor'}
-              <select class="variant">
-                ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
-              </select>
-            </label>
-
-            <label>Pagamento
-              <select class="pay">
-                <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
-              </select>
-            </label>
-
-            <button class="btnBuy botao">Comprar no WhatsApp</button>
-          </div>
+    card.innerHTML = `
+      <div class="media"><img src="${esc(img)}"></div>
+      <div class="info">
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${esc(priceText)}</p>
+        <div class="controls">
+          <label>Quantidade
+            <select class="qty">
+              <option>1</option><option>2</option><option>3</option>
+            </select>
+          </label>
+          <label>${p.type === "pod" ? "Sabor" : "Cor"}
+            <select class="variant">
+              ${(p.options || []).map(o => `<option>${esc(o)}</option>`).join("")}
+            </select>
+          </label>
+          <label>Pagamento
+            <select class="pay">
+              <option>PIX</option><option>Dinheiro</option><option>Cartão</option>
+            </select>
+          </label>
+          <button class="botao btnBuy">Comprar no WhatsApp</button>
         </div>
-      `;
+      </div>
+    `;
 
-      card.querySelector('.btnBuy').addEventListener('click', ()=>{
-        const qtd = card.querySelector('.qty').value;
-        const variant = card.querySelector('.variant').value;
-        const pay = card.querySelector('.pay').value;
-        const label = p.type === 'pod' ? 'Sabor' : 'Cor';
+    card.querySelector(".btnBuy").addEventListener("click", () => {
+      const qtd = card.querySelector(".qty").value;
+      const variant = card.querySelector(".variant").value;
+      const pay = card.querySelector(".pay").value;
+      const label = p.type === "pod" ? "Sabor" : "Cor";
 
-        const msg = encodeURIComponent(
-          `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
-        );
+      const message = encodeURIComponent(
+        `Olá! Tenho interesse no produto: ${p.name}\nQuantidade: ${qtd}\n${label}: ${variant}\nPagamento: ${pay}`
+      );
 
-        window.open(`https://wa.me/${PHONE}?text=${msg}`, "_blank");
-      });
-
-      grid.appendChild(card);
+      window.open(`https://wa.me/${PHONE}?text=${message}`, "_blank");
     });
 
-    if(!grid.children.length){
-      grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
-    }
-  }
-
-  catButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      catButtons.forEach(b => b.classList.remove("ativo-cat"));
-      btn.classList.add("ativo-cat");
-      render(btn.dataset.cat);
-    });
+    grid.appendChild(card);
   });
 
-  loadProdutos();
+  if(!grid.children.length){
+    grid.innerHTML = "<p>Nenhum item nesta categoria.</p>";
+  }
+}
+
+catButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    catButtons.forEach(b => b.classList.remove("ativo-cat"));
+    btn.classList.add("ativo-cat");
+    render(btn.dataset.cat);
+  });
+});
+
+loadProdutos();
 </script>
 
 </body>
