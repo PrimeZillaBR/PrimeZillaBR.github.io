@@ -1,5 +1,19 @@
 [
   {
+    "name": "copo termico 1,2l",
+    "price": 120,
+    "currency": "R$",
+    "category": "acessorios",
+    "type": "pod",
+    "options": [
+      "rosa",
+      "preto",
+      "verde"
+    ],
+    "imageUrl": "https://res.cloudinary.com/duwsueept/image/upload/c_fill,g_auto,w_800,h_800/v1765504279/t99fcmompneft95wqjhz.jpg",
+    "active": true
+  },
+  {
     "name": "life pod 10k + case",
     "price": 130,
     "currency": "R$",
